@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#g)"/>
+  <!-- paper plane -->
+  <g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" transform="translate(9 8) scale(1.55)">
+    <path d="m22 2-7 20-4-9-9-4z" fill="#fff" fill-opacity=".18"/>
+    <path d="M22 2 11 13"/>
+  </g>
+  <!-- download badge -->
+  <circle cx="47" cy="47" r="13" fill="#0b1120"/>
+  <g fill="none" stroke="#34d399" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M47 40v13"/>
+    <path d="m41.5 47.5 5.5 5.5 5.5-5.5"/>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+# secrets and runtime state never belong in the repo
+.env
+*.env
+!.env.example
+config/
+*.session
+*.session-journal
+apikey
+
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+*.log

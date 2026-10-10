@@ -1,0 +1,1554 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1120" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f7fb" media="(prefers-color-scheme: light)">
+<script>try { const t = JSON.parse(localStorage.getItem("tgarr.theme")); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch {}</script>
+<title>tgarr</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f7fb;--surface:#ffffff;--surface-2:#eef2f7;--ink:#0f172a;--mute:#5b6577;--line:#e2e8f0;
+  --accent:#047857;--accent-ink:#ffffff;--accent-soft:#d1fae5;--info:#2563eb;--info-soft:#dbeafe;
+  --warn:#b45309;--warn-soft:#fef3c7;--bad:#b91c1c;--bad-soft:#fee2e2;--ok:#047857;
+  --ring:#2563eb;--shadow:0 1px 2px rgba(15,23,42,.06),0 4px 16px rgba(15,23,42,.06);
+  --r:14px;--tab-h:64px;--safe-b:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1120;--surface:#131b2e;--surface-2:#1b2540;--ink:#e8edf6;--mute:#93a0b8;--line:rgba(255,255,255,.08);
+  --accent:#10b981;--accent-ink:#04120c;--accent-soft:rgba(16,185,129,.14);--info:#60a5fa;--info-soft:rgba(96,165,250,.14);
+  --warn:#fbbf24;--warn-soft:rgba(251,191,36,.13);--bad:#f87171;--bad-soft:rgba(248,113,113,.13);--ok:#34d399;
+  --ring:#93c5fd;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0b1120;--surface:#131b2e;--surface-2:#1b2540;--ink:#e8edf6;--mute:#93a0b8;--line:rgba(255,255,255,.08);
+  --accent:#10b981;--accent-ink:#04120c;--accent-soft:rgba(16,185,129,.14);--info:#60a5fa;--info-soft:rgba(96,165,250,.14);
+  --warn:#fbbf24;--warn-soft:rgba(251,191,36,.13);--bad:#f87171;--bad-soft:rgba(248,113,113,.13);--ok:#34d399;
+  --ring:#93c5fd;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+:root[data-theme="light"]{color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  padding-bottom:calc(var(--tab-h) + var(--safe-b) + 16px)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+svg.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- top bar & nav ---------- */
+.top{position:sticky;top:0;z-index:20;background:var(--bg);
+  border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px}
+.top-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:-.01em}
+.logo{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.logo svg{width:17px;height:17px}
+.theme-btn{order:3;flex:none}
+.health{margin-left:auto;display:flex;gap:6px;align-items:center}
+.dot{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--mute);background:var(--surface);
+  border:1px solid var(--line);border-radius:99px;padding:4px 10px 4px 8px;white-space:nowrap}
+.dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--bad)}
+.dot.ok::before{background:var(--ok)}
+.dot .lbl{display:none}
+@media (min-width:720px){.dot .lbl{display:inline}}
+
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;justify-content:space-around;background:var(--surface);
+  border-top:1px solid var(--line);padding:6px 8px calc(6px + var(--safe-b));height:calc(var(--tab-h) + var(--safe-b))}
+.tab{flex:1;max-width:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;background:none;
+  color:var(--mute);font-size:12px;font-weight:600;border-radius:12px;cursor:pointer;position:relative;transition:color .2s,background .2s}
+.tab[aria-selected=true]{color:var(--accent);background:var(--accent-soft)}
+.badge{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--info);
+  color:#fff;font-size:11px;line-height:18px;text-align:center}
+.badge:empty{display:none}
+@media (min-width:900px){
+  body{padding-bottom:24px}
+  .tabs{position:static;height:auto;background:none;border:0;padding:0;gap:4px;justify-content:flex-start}
+  .tab{flex-direction:row;gap:8px;font-size:14px;padding:8px 14px;max-width:none}
+  .badge{position:static;margin-left:2px}
+  .top-in .tabs{order:1}.health{order:2}
+}
+
+/* ---------- layout ---------- */
+main{max-width:1100px;margin:0 auto;padding:16px}
+.view{display:none}.view.on{display:block;animation:fade .2s ease-out}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.step{width:20px;height:20px;border-radius:50%;background:var(--surface-2);color:var(--ink);display:grid;place-items:center;font-size:11px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.field{display:flex;flex-direction:column;gap:6px;flex:1 1 220px;min-width:0}
+.field>span{font-size:13px;font-weight:500;color:var(--mute)}
+input[type=text],input[type=search],input[type=number],select{height:44px;border:1px solid var(--line);background:var(--bg);border-radius:10px;
+  padding:0 12px;min-width:0;width:100%;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--ring)}
+.btn{height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 16px;border-radius:10px;
+  border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer;white-space:nowrap;transition:background .2s,opacity .2s,transform .1s}
+.btn:hover{background:var(--surface-2)}
+.btn:active{transform:scale(.98)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.block{width:100%}
+.icon-btn{width:44px;height:44px;display:inline-grid;place-items:center;border-radius:10px;border:0;background:none;color:var(--mute);cursor:pointer;transition:background .2s,color .2s}
+.icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+.icon-btn.danger:hover{background:var(--bad-soft);color:var(--bad)}
+.hint{font-size:13px;color:var(--mute);margin-top:10px}
+.err{color:var(--bad)}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:3px;gap:2px}
+.seg button{height:38px;border:0;background:none;padding:0 14px;border-radius:8px;font-weight:600;font-size:14px;color:var(--mute);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.spin{width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ---------- target posters ---------- */
+.posters{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 8px;margin-top:12px;scroll-snap-type:x mandatory}
+.poster{flex:0 0 112px;scroll-snap-align:start;border:2px solid transparent;border-radius:12px;background:var(--surface-2);padding:6px;
+  cursor:pointer;text-align:left;font-size:12px;line-height:1.3;transition:border-color .2s}
+.poster .img{width:100%;aspect-ratio:2/3;border-radius:8px;background:var(--line) center/cover no-repeat;margin-bottom:6px}
+.poster b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:600}
+.poster{transition:border-color .2s,transform .2s cubic-bezier(.2,.8,.2,1)}
+.poster:hover{transform:translateY(-2px)}
+.poster[aria-pressed=true]{border-color:var(--accent);animation:pop .3s cubic-bezier(.2,.8,.2,1)}
+.chosen{animation:fade .25s ease-out;display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px;border-radius:12px;background:var(--accent-soft)}
+.chosen .img{width:40px;height:60px;border-radius:6px;background:var(--line) center/cover;flex:none}
+.chosen small{color:var(--mute);display:block}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--mute)}
+.tag.ok{background:var(--accent-soft);color:var(--ok)}
+.tag.warnt{background:var(--warn-soft);color:var(--warn)}
+.tag.badt{background:var(--bad-soft);color:var(--bad)}
+.repl{display:flex;gap:10px;align-items:flex-start;margin-top:10px;padding:10px;border-radius:10px;background:var(--surface-2);cursor:pointer}
+.repl small{display:block;color:var(--mute)}
+
+/* ---------- file list ---------- */
+.list-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.chk{width:22px;height:22px;accent-color:var(--accent);cursor:pointer;flex:none}
+.files{display:flex;flex-direction:column}
+.file{display:grid;grid-template-columns:44px 1fr;gap:4px 8px;padding:10px 0;border-top:1px solid var(--line);align-items:start}
+.file .pick{width:44px;height:44px;display:grid;place-items:center;cursor:pointer}
+.file .name{font-weight:500;word-break:break-word;font-size:14px;padding-top:10px}
+.file .cap{color:var(--mute);font-size:13px;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;unicode-bidi:plaintext}
+.file .meta{grid-column:2;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:12px;color:var(--mute)}
+.se{display:inline-flex;align-items:center;gap:4px}
+.se input{width:56px;height:36px;text-align:center;padding:0 4px}
+.se input.check{border-color:var(--warn);background:var(--warn-soft)}
+.src-note{font-size:12px;color:var(--mute)}
+.src-note .warn{color:var(--warn);font-weight:600}
+select.miss{width:auto;height:40px;font-weight:600;background:var(--accent-soft);color:var(--ok);border-color:transparent;cursor:pointer}
+.coverage{font-size:13px;color:var(--mute);margin:2px 0 6px;display:flex;gap:6px 14px;flex-wrap:wrap}
+.coverage b{color:var(--ink)}
+.coverage{align-items:center}
+.chip{height:30px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;
+  transition:background .2s,border-color .2s}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chip[aria-pressed=true]{border-color:currentColor;box-shadow:0 0 0 1px currentColor inset}
+.filtering{color:var(--ink)}
+.linkbtn{border:0;background:none;color:var(--accent);font-weight:600;cursor:pointer;padding:4px;font-size:13px}
+.file.sel{background:linear-gradient(90deg,var(--accent-soft),transparent 60%)}
+.empty{padding:28px 8px;text-align:center;color:var(--mute)}
+
+/* sticky selection bar */
+.selbar{position:fixed;left:12px;right:12px;bottom:calc(var(--tab-h) + var(--safe-b) + 10px);z-index:25;background:var(--surface);
+  border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:10px;display:none;gap:8px;align-items:center;flex-wrap:wrap;
+  max-width:1076px;margin:0 auto}
+.selbar.on{display:flex;animation:rise .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.selbar .count{font-weight:600;font-size:14px;padding:0 6px}
+.selbar .count small{display:block;font-weight:400;color:var(--mute);font-size:12px}
+.selbar .tools{display:flex;gap:6px;align-items:center}
+.selbar .tools input{width:64px}
+.selbar .go{margin-left:auto}
+@media (min-width:900px){.selbar{bottom:20px}}
+@media (max-width:520px){.selbar .go{flex:1 1 100%}.selbar .go .btn{width:100%}}
+
+/* ---------- sources ---------- */
+.src{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.src:first-child{border-top:0}
+.src .t{flex:1;min-width:0}
+.src .t b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;unicode-bidi:plaintext}
+.src .t small{color:var(--mute);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- jobs ---------- */
+.toolbar{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+.toolbar .btn{height:40px;font-size:14px}
+.batch{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;box-shadow:var(--shadow);overflow:hidden}
+.bhead{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px}
+.bposter{width:44px;height:66px;border-radius:8px;background:var(--surface-2) center/cover}
+.btitle{min-width:0;cursor:pointer}
+.btitle b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btitle small{color:var(--mute);font-size:13px}
+.bactions{display:flex;align-items:center}
+.chev{transition:transform .2s}
+.batch.open>.bhead .chev{transform:rotate(180deg)}
+.bar{height:6px;background:var(--surface-2);border-radius:9px;overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--info);border-radius:9px;transition:width .6s ease}
+.bar.done i{background:var(--ok)}.bar.error i{background:var(--bad)}.bar.paused i,.bar.stopped i{background:var(--warn)}
+/* expand/collapse animates the row track from 0fr to 1fr, so no height measuring is needed */
+.items{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s cubic-bezier(.2,.8,.2,1)}
+.batch.open>.items,.season.open>.items{grid-template-rows:1fr}
+.items-clip{min-height:0;overflow:hidden}
+.items-in{border-top:1px solid var(--line);padding:4px 12px 8px;opacity:0;transform:translateY(-6px);transition:opacity .25s,transform .3s}
+.batch.open>.items>.items-clip>.items-in,.season.open>.items>.items-clip>.items-in{opacity:1;transform:none}
+/* season groups inside a multi-season batch */
+.season{border-top:1px solid var(--line)}
+.season:first-child{border-top:0}
+.shead{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0}
+.shead .stitle{cursor:pointer;min-width:0}
+.shead .stitle b{font-size:14px;font-weight:600}
+.shead .stitle small{color:var(--mute);font-size:12px;margin-left:6px}
+.shead .bar{margin-top:6px}
+.season.open .chev{transform:rotate(180deg)}
+.season>.items>.items-clip>.items-in{border-top:0;padding:0 0 4px 12px;border-left:2px solid var(--line);margin-left:2px}
+.item{display:grid;grid-template-columns:1fr auto;gap:4px 8px;padding:10px 0;border-top:1px solid var(--line);align-items:center}
+.item:first-child{border-top:0}
+.item .n{font-size:14px;font-weight:500;word-break:break-word}
+.item .sub{font-size:12px;color:var(--mute);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.item .full{grid-column:1/-1}
+.st{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--mute)}
+.st.starting,.st.downloading,.st.importing,.st.extracting{background:var(--info-soft);color:var(--info)}
+.st.done{background:var(--accent-soft);color:var(--ok)}
+.st.error{background:var(--bad-soft);color:var(--bad)}
+.st.paused,.st.stopped{background:var(--warn-soft);color:var(--warn)}
+.ia{display:flex}
+.ia .icon-btn{width:40px;height:40px}
+
+/* toast */
+.toast{position:fixed;left:50%;transform:translate(-50%,-8px) scale(.98);transition:opacity .2s,transform .25s cubic-bezier(.2,.8,.2,1)!important;top:calc(env(safe-area-inset-top,0px) + 70px);z-index:50;background:var(--ink);color:var(--bg);
+  padding:10px 16px;border-radius:12px;font-size:14px;font-weight:500;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px)}
+.toast.on{opacity:1;transform:translate(-50%,0) scale(1)}
+.toast.bad{background:var(--bad);color:#fff}
+/* keyed enter / leave (see morph) */
+.enter{animation:enter .32s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(min(var(--i,0),14) * 22ms)}
+@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.leaving{animation:leave .22s ease-in forwards;pointer-events:none}
+@keyframes leave{to{opacity:0;transform:translateX(16px)}}
+.flash{animation:flash 1.1s ease-out}
+@keyframes flash{0%{box-shadow:inset 0 0 0 999px var(--accent-soft)}100%{box-shadow:inset 0 0 0 999px transparent}}
+.st{transition:background .3s,color .3s}
+.file{transition:background .25s}
+.chev{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.btn,.icon-btn,.tab{transition:background .2s,color .2s,transform .12s,opacity .2s}
+.icon-btn:active,.tab:active{transform:scale(.92)}
+/* scanning placeholders */
+.skel{display:grid;grid-template-columns:44px 1fr;gap:8px;padding:12px 0;border-top:1px solid var(--line)}
+.skel i{display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--surface-2) 0%,var(--line) 50%,var(--surface-2) 100%);
+  background-size:200% 100%;animation:shimmer 1.2s linear infinite}
+.skel i.box{width:22px;height:22px;margin:10px auto 0}
+.skel div i+i{margin-top:8px;width:60%}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+/* tab change crossfade (View Transitions where supported) */
+::view-transition-old(root){animation:vt-out .16s ease-in both}
+::view-transition-new(root){animation:vt-in .24s cubic-bezier(.2,.8,.2,1) both}
+@keyframes vt-out{to{opacity:0;transform:translateY(-4px)}}
+@keyframes vt-in{from{opacity:0;transform:translateY(6px)}}
+/* global activity bar */
+#loadbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;overflow:hidden;opacity:0;transition:opacity .2s;pointer-events:none}
+#loadbar.on{opacity:1}
+#loadbar::before{content:"";position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  animation:slide 1s ease-in-out infinite}
+@keyframes slide{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+.icon-btn:disabled{opacity:.5;cursor:wait}
+.icon-btn .spin{width:18px;height:18px}
+.libnote{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:var(--mute)}
+.libnote .spin{width:14px;height:14px}
+.or{display:flex;align-items:center;gap:10px;color:var(--mute);font-size:12px;margin:14px 0 10px;text-transform:uppercase;letter-spacing:.08em}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+/* chat picker */
+dialog#picker{width:min(520px,calc(100% - 24px));max-height:min(80vh,720px)}
+dialog#picker .m-in{display:flex;flex-direction:column;max-height:min(80vh,720px)}
+.plist{overflow-y:auto;margin:0 -8px;padding:0 8px;min-height:120px}
+.pchat{display:flex;align-items:center;gap:12px;width:100%;padding:10px 8px;border:0;background:none;border-radius:10px;text-align:left;cursor:pointer;
+  transition:background .2s}
+.pchat:hover{background:var(--surface-2)}
+.pchat:disabled{opacity:.55;cursor:default}
+.pchat .av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none}
+.pchat .t{flex:1;min-width:0}
+.pchat .t b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;unicode-bidi:plaintext}
+.pchat .t small{color:var(--mute)}
+/* fancy select: native <select> stays (hidden) as the source of truth */
+.fsel{position:relative;min-width:0}
+.fsel>select.native{position:absolute;inset:0;opacity:0;pointer-events:none}
+.fsel-btn{width:100%;height:44px;display:flex;align-items:center;gap:10px;padding:0 12px;border:1px solid var(--line);background:var(--bg);
+  border-radius:10px;cursor:pointer;text-align:left;font-weight:500;transition:border-color .2s,background .2s}
+.fsel-btn:hover{border-color:color-mix(in srgb,var(--ring) 50%,var(--line))}
+.fsel-btn:disabled{opacity:.5;cursor:not-allowed}
+.fsel.open .fsel-btn{border-color:var(--ring)}
+.fsel-v{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;unicode-bidi:plaintext}
+.fsel-v.ph{color:var(--mute);font-weight:400}
+.fsel-btn .chev{color:var(--mute)}
+.fsel.open .fsel-btn .chev{transform:rotate(180deg)}
+.fsel-menu{position:fixed;z-index:80;max-height:320px;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 16px 40px rgba(0,0,0,.3);padding:6px;opacity:0;transform:translateY(-4px) scale(.98);transform-origin:top;pointer-events:none;
+  transition:opacity .15s,transform .18s cubic-bezier(.2,.8,.2,1)}
+.fsel-menu.up{transform-origin:bottom}
+.fsel.open .fsel-menu{opacity:1;transform:none;pointer-events:auto}
+.fsel-opt{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;cursor:pointer;min-height:44px;font-size:14px}
+.fsel-opt .lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;unicode-bidi:plaintext}
+.fsel-opt:hover,.fsel-opt.active{background:var(--surface-2)}
+.fsel-opt[aria-selected=true]{color:var(--accent);font-weight:600}
+.fsel-opt[aria-disabled=true]{opacity:.5;cursor:default;background:none}
+.fsel-opt .av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#fff;flex:none}
+.fsel-opt svg.i{width:18px;height:18px}
+.fsel.miss .fsel-btn{background:var(--accent-soft);color:var(--ok);border-color:transparent;font-weight:600;height:40px}
+.fsel.miss .fsel-btn .chev{color:var(--ok)}
+.want{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.want:first-child{border-top:0}
+.want .img{width:44px;height:66px;border-radius:8px;background:var(--surface-2) center/cover}
+.want b{display:block;font-weight:600}
+.want small{color:var(--mute);display:block;unicode-bidi:plaintext}
+@media (max-width:560px){.want{grid-template-columns:44px 1fr}.want .act{grid-column:1/-1}.want .act .btn{width:100%}}
+.linked{display:inline-flex;align-items:center;gap:4px;color:var(--ok);font-weight:600}
+.linked svg.i{width:14px;height:14px}
+.unlinked{color:var(--warn)}
+.src .t small{white-space:normal}
+.autolog{font-size:13px;color:var(--mute);margin:6px 0 10px}
+.autolog summary{cursor:pointer;color:var(--ink);font-weight:600;padding:6px 0}
+.autolog div{padding:3px 0}
+.autolog span{display:inline-block;min-width:84px;color:var(--mute)}
+.integ-row{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.integ-row .n{margin-left:auto;color:var(--mute);font-size:13px;white-space:nowrap}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;margin-top:10px}
+.kv code{font-family:ui-monospace,Consolas,monospace;word-break:break-all;color:var(--ink)}
+.kv span{color:var(--mute)}
+/* themed thin scrollbars */
+*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mute) 45%,transparent) transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--mute) 45%,transparent);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+dialog#picker{overflow:hidden}  /* only the chat list scrolls */
+/* chat avatars: photo over a coloured initial (initial shows when there's no photo) */
+.av{position:relative;overflow:hidden}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.src .av{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;flex:none}
+.fsel-btn .av{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex:none;margin-left:-4px}
+/* episode mapping */
+.map{font-size:12px;color:var(--mute)}
+.map b{color:var(--ink);font-weight:600}
+.map.moved b{color:var(--info)}
+.map.bad{color:var(--warn);font-weight:600}
+.numbering{margin-top:12px;padding:10px;border-radius:12px;background:var(--surface-2)}
+.numbering .seg{background:var(--bg)}
+.numbering small{display:block;color:var(--mute);margin-top:8px}
+/* confirm modal */
+dialog#picker,dialog#modal{border:1px solid var(--line);border-radius:18px;padding:0;background:var(--surface);color:var(--ink);box-shadow:0 24px 60px rgba(0,0,0,.35)}
+dialog#picker::backdrop{background:rgba(5,8,16,.55);backdrop-filter:blur(3px)}
+dialog#picker[open]{animation:pop .18s ease-out}
+dialog#modal{border:1px solid var(--line);border-radius:18px;padding:0;background:var(--surface);color:var(--ink);
+  width:min(420px,calc(100% - 32px));box-shadow:0 24px 60px rgba(0,0,0,.35)}
+dialog#modal::backdrop{background:rgba(5,8,16,.55);backdrop-filter:blur(3px)}
+dialog#modal[open]{animation:pop .18s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.m-in{padding:20px}
+.m-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.m-head h3{margin:0;font-size:17px;font-weight:600}
+.m-icon{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--info-soft);color:var(--info);flex:none}
+.m-icon.danger{background:var(--bad-soft);color:var(--bad)}
+.m-body{color:var(--mute);font-size:14px}
+.m-body p{margin:8px 0}
+.m-body ul{margin:8px 0;padding-left:18px}
+.m-body b{color:var(--ink)}
+.m-sum{display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;background:var(--surface-2);margin:10px 0}
+.m-sum .img{width:36px;height:54px;border-radius:6px;background:var(--line) center/cover;flex:none}
+.m-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.btn.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+@media (max-width:520px){.m-actions .btn{flex:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="i-dl" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M6 3l14 9-14 9z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></symbol>
+  <symbol id="i-auto" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></symbol>
+</svg>
+<script>const I = (n, label) => `<svg class="i" ${label ? `role="img" aria-label="${label}"` : 'aria-hidden="true"'}><use href="#i-${n}"/></svg>`;</script>
+
+<div id="loadbar" role="progressbar" aria-label="Working"></div>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="logo"><svg class="i"><use href="#i-send"/></svg></span>tgarr</div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" data-tab="find" aria-selected="true"><svg class="i"><use href="#i-search"/></svg>Find</button>
+      <button class="tab" role="tab" data-tab="wanted" aria-selected="false"><svg class="i"><use href="#i-dl"/></svg>Wanted<span class="badge" id="wantcount"></span></button>
+      <button class="tab" role="tab" data-tab="sources" aria-selected="false"><svg class="i"><use href="#i-link"/></svg>Sources</button>
+      <button class="tab" role="tab" data-tab="jobs" aria-selected="false"><svg class="i"><use href="#i-list"/></svg>Jobs<span class="badge" id="jobcount"></span></button>
+    </nav>
+    <div class="health" id="health" aria-live="polite"></div>
+    <button class="icon-btn theme-btn" id="themeBtn" type="button"></button>
+  </div>
+</header>
+
+<main>
+<!-- ================= FIND ================= -->
+<section class="view on" id="find">
+  <div class="card">
+    <h2><span class="step">1</span>Scan Telegram</h2>
+    <div class="row">
+      <label class="field"><span>Source</span><select id="fsrc"></select></label>
+      <label class="field" style="flex-basis:280px"><span>Search captions &amp; file names (optional)</span>
+        <input id="fq" type="search" placeholder="e.g. פרק 5, S02, episode name… empty lists everything" enterkeyhint="search"></label>
+      <div class="field" style="flex:0 0 auto;justify-content:flex-end"><span>&nbsp;</span>
+        <button class="btn primary" id="fgo"><svg class="i"><use href="#i-search"/></svg>Scan</button></div>
+    </div>
+    <div class="hint" id="fmsg" aria-live="polite"></div>
+  </div>
+
+  <div class="card">
+    <h2 id="step2"><span class="step">2</span>Import as</h2>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Library">
+        <button data-kind="tv" aria-pressed="true">TV / Anime</button><button data-kind="movie" aria-pressed="false">Movie</button>
+      </div>
+      <input id="lt" type="search" placeholder="Search Sonarr for the series" style="flex:1 1 200px" enterkeyhint="search" aria-label="Search Sonarr or Radarr" autocomplete="off">
+      <button class="btn" id="lgo">Look up</button>
+    </div>
+    <div class="posters" id="targets"></div>
+    <div id="chosen"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">3</span>Pick files</h2>
+    <div class="list-head">
+      <label class="row" style="gap:10px;cursor:pointer"><input type="checkbox" class="chk" id="all"><span>Select all</span></label>
+      <select id="missSel" class="miss" aria-label="Select missing episodes"></select>
+      <label class="row" style="gap:10px;cursor:pointer;margin-left:auto;font-size:14px;color:var(--mute)"><input type="checkbox" class="chk" id="onlyvid" checked>Hide subtitles</label>
+      <label class="row" style="gap:10px;cursor:pointer;font-size:14px;color:var(--mute)" id="extrasWrap"><input type="checkbox" class="chk" id="showx"><span id="extrasLbl">Show extras</span></label>
+    </div>
+    <div class="coverage" id="coverage" aria-live="polite"></div>
+    <div class="files" id="files"><div class="empty">Pick a source and press Scan.</div></div>
+  </div>
+</section>
+
+<!-- ================= WANTED ================= -->
+<section class="view" id="wanted">
+  <div class="card">
+    <h2>Requested and missing</h2>
+    <div class="hint" style="margin-top:0">Series Sonarr is still missing episodes for (including Overseerr requests) that one of your directory channels carries.</div>
+    <div id="wlist"><div class="empty">Loading…</div></div>
+  </div>
+</section>
+
+<!-- ================= SOURCES ================= -->
+<section class="view" id="sources">
+  <div class="card">
+    <h2>Add a channel or group</h2>
+    <div class="row">
+      <label class="field" style="flex-basis:100%"><span>Telegram link</span>
+        <input id="slink" type="text" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="https://t.me/+invite · https://t.me/name · @name"></label>
+      <label class="field"><span>Content</span>
+        <select id="skind"><option value="tv">TV / Anime</option><option value="movie">Movies</option><option value="any">Mixed</option></select></label>
+      <label class="field"><span>Note (optional)</span><input id="snote" type="text" placeholder="e.g. Hebrew subs"></label>
+      <div class="field" style="flex:0 0 auto;justify-content:flex-end"><span>&nbsp;</span>
+        <button class="btn primary" id="sadd"><svg class="i"><use href="#i-plus"/></svg>Add</button></div>
+    </div>
+    <div class="or"><span>or</span></div>
+    <button class="btn block" id="spick"><svg class="i"><use href="#i-list"/></svg>Pick from my Telegram chats</button>
+    <div class="hint" id="smsg" aria-live="polite"></div>
+    <div class="hint">No link? Pick any group or channel you're already in, including private ones. You can also paste a message link (t.me/c/…).</div>
+  </div>
+  <div class="card" id="slist"></div>
+  <div class="card" id="integ"></div>
+</section>
+
+<!-- ================= JOBS ================= -->
+<section class="view" id="jobs">
+  <div class="toolbar">
+    <button class="btn" data-all="pause"><svg class="i"><use href="#i-pause"/></svg>Pause all</button>
+    <button class="btn" data-all="resume"><svg class="i"><use href="#i-play"/></svg>Resume all</button>
+    <button class="btn" data-all="retry-failed"><svg class="i"><use href="#i-retry"/></svg>Retry failed</button>
+    <button class="btn" id="clear"><svg class="i"><use href="#i-check"/></svg>Clear finished</button>
+  </div>
+  <div id="jlist"></div>
+</section>
+</main>
+
+<div class="selbar" id="selbar" role="region" aria-label="Selection">
+  <div class="count" id="selcount"></div>
+  <div class="tools tvonly">
+    <input id="bulkS" type="number" inputmode="numeric" min="0" placeholder="S" aria-label="Season for selected">
+    <button class="btn" id="bulkSet">Set season</button>
+    <button class="btn" id="renum" title="Number selected videos 1..n in post order">1..n</button>
+  </div>
+  <div class="go"><button class="btn primary" id="dl"><svg class="i"><use href="#i-dl"/></svg><span id="dllabel">Download</span></button></div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<dialog id="picker" aria-labelledby="pTitle">
+  <div class="m-in">
+    <div class="m-head"><span class="m-icon"><svg class="i"><use href="#i-send"/></svg></span><h3 id="pTitle">Your Telegram chats</h3>
+      <button class="icon-btn" style="margin-left:auto" id="pClose" aria-label="Close"><svg class="i"><use href="#i-plus" transform="rotate(45 12 12)"/></svg></button></div>
+    <div class="row" style="margin:8px 0">
+      <input id="pq" type="search" placeholder="Search groups & channels" autocomplete="off" aria-label="Search your chats" style="flex:1">
+      <select id="pkind" aria-label="Content type" style="width:auto"><option value="tv">TV / Anime</option><option value="movie">Movies</option><option value="any">Mixed</option></select>
+    </div>
+    <div class="plist" id="plist"></div>
+  </div>
+</dialog>
+<dialog id="modal" aria-labelledby="mTitle">
+  <form method="dialog" class="m-in">
+    <div class="m-head"><span class="m-icon" id="mIcon"></span><h3 id="mTitle"></h3></div>
+    <div class="m-body" id="mBody"></div>
+    <div class="m-actions">
+      <button class="btn" value="cancel" id="mCancel">Cancel</button>
+      <button class="btn primary" value="ok" id="mOk">OK</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt = b => !b ? "0 MB" : b >= 1e9 ? (b / 1e9).toFixed(2) + " GB" : Math.round(b / 1e6) + " MB";
+const pad = n => String(n).padStart(2, "0");
+const store = {get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+               set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }};
+// every user-triggered request shows the top loading bar; background polling passes {quiet: true}
+let inflight = 0;
+async function api(path, opts = {}) {
+  const loud = !opts.quiet;
+  if (loud) $("#loadbar").classList.toggle("on", ++inflight > 0);
+  try {
+    const r = await fetch("/api" + path, {headers: {"Content-Type": "application/json"}, method: opts.method,
+      body: opts.body ? JSON.stringify(opts.body) : undefined});
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.detail || r.statusText);
+    return d;
+  } finally {
+    if (loud) $("#loadbar").classList.toggle("on", --inflight > 0);
+  }
+}
+let toastT;
+function toast(msg, bad) {
+  const t = $("#toast"); t.textContent = msg; t.className = "toast on" + (bad ? " bad" : "");
+  clearTimeout(toastT); toastT = setTimeout(() => t.className = "toast", 3200);
+}
+// styled replacement for confirm(): resolves true on OK, false on Cancel / Esc / backdrop click
+function ask({title, body = "", ok = "OK", danger = false, icon = danger ? "trash" : "check"}) {
+  const m = $("#modal");
+  $("#mTitle").textContent = title;
+  $("#mBody").innerHTML = body;
+  $("#mIcon").className = "m-icon" + (danger ? " danger" : "");
+  $("#mIcon").innerHTML = I(icon);
+  $("#mOk").textContent = ok;
+  $("#mOk").className = "btn " + (danger ? "danger" : "primary");
+  m.returnValue = "";
+  m.showModal();
+  $("#mCancel").focus();  // safe default for destructive prompts
+  return new Promise(res => {
+    const close = () => { m.removeEventListener("close", close); m.removeEventListener("click", outside); res(m.returnValue === "ok"); };
+    const outside = e => { if (e.target === m) m.close("cancel"); };
+    m.addEventListener("close", close);
+    m.addEventListener("click", outside);
+  });
+}
+// ---------- minimal keyed DOM morph ----------
+// Re-rendering via innerHTML recreates every node: progress bars jump, animations replay, focus and typing are lost.
+// morph() patches the live DOM toward the new markup instead. Children with data-key are matched by key
+// (entering ones get .enter, leaving ones animate out); others are matched by position.
+const keyOf = n => n.nodeType === 1 ? n.getAttribute("data-key") : null;
+const TRANSIENT = ["enter", "leaving", "flash"];
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+function morph(el, html) {
+  const t = document.createElement("template");
+  t.innerHTML = html.trim();
+  patchChildren(el, t.content);
+}
+function patchChildren(from, to) {
+  const old = [...from.childNodes].filter(n => !(n.classList && n.classList.contains("leaving")));
+  const byKey = new Map(old.filter(keyOf).map(n => [keyOf(n), n]));
+  const used = new Set();
+  let oi = 0, cursor = null;
+  for (const nn of [...to.childNodes]) {
+    const k = keyOf(nn);
+    let node = null;
+    if (k != null) node = byKey.get(k) || null;
+    else {
+      while (oi < old.length && (keyOf(old[oi]) != null || used.has(old[oi]))) oi++;
+      if (old[oi] && old[oi].nodeName === nn.nodeName) node = old[oi++];
+    }
+    if (node && node.nodeName === nn.nodeName) { used.add(node); patchNode(node, nn); }
+    else {
+      node = document.importNode(nn, true);
+      if (k != null && !reduceMotion.matches) {
+        node.classList.add("enter");
+        node.addEventListener("animationend", () => node.classList.remove("enter"), {once: true});
+      }
+    }
+    const want = cursor ? cursor.nextSibling : from.firstChild;
+    if (node !== want) from.insertBefore(node, want);
+    cursor = node;
+  }
+  for (const n of old) {
+    if (used.has(n)) continue;
+    if (keyOf(n) != null && !reduceMotion.matches) {
+      n.classList.add("leaving");
+      setTimeout(() => n.remove(), 240);
+    } else n.remove();
+  }
+}
+function patchNode(a, b) {
+  if (a.nodeType !== 1) { if (a.nodeValue !== b.nodeValue) a.nodeValue = b.nodeValue; return; }
+  // a job turning "done" gets a brief highlight
+  if (a.dataset.status && b.dataset.status && a.dataset.status !== b.dataset.status && b.dataset.status === "done" && !reduceMotion.matches) {
+    a.classList.add("flash"); setTimeout(() => a.classList.remove("flash"), 1100);
+  }
+  for (const {name, value} of [...b.attributes]) {
+    if (name === "class") {
+      const keep = TRANSIENT.filter(c => a.classList.contains(c));
+      const want = [value, ...keep].join(" ").trim();
+      if (a.className !== want) a.className = want;
+    } else if (a.getAttribute(name) !== value) a.setAttribute(name, value);
+  }
+  for (const {name} of [...a.attributes]) if (!b.hasAttribute(name)) a.removeAttribute(name);
+  if (a.nodeName === "INPUT") {
+    a.checked = b.hasAttribute("checked");
+    if (document.activeElement !== a) a.value = b.getAttribute("value") ?? "";  // never clobber what the user is typing
+    return;
+  }
+  patchChildren(a, b);
+}
+const buzz = () => { try { navigator.vibrate?.(8); } catch {} };
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+// "~4m 10s left" from bytes remaining and current bytes/s
+function eta(bytes, bps) {
+  if (!bps || bytes <= 0) return "";
+  const t = Math.round(bytes / bps), h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), sec = t % 60;
+  return "~" + (h ? `${h}h ${pad(m)}m` : m ? `${m}m ${pad(sec)}s` : `${sec}s`) + " left";
+}
+const mbps = b => `${(b / 1e6).toFixed(1)} MB/s`;
+// idempotent: a second busy(on) while already busy must not save the spinner as the "normal" content
+function busy(btn, on) {
+  if (!btn) return;
+  if (on) {
+    if (btn.dataset.busy) return;
+    btn.dataset.busy = "1"; btn.dataset.html = btn.innerHTML; btn.innerHTML = `<span class="spin"></span>`; btn.disabled = true;
+  } else if (btn.dataset.busy) {
+    btn.innerHTML = btn.dataset.html; btn.disabled = false; delete btn.dataset.busy;
+  }
+}
+
+let files = [], target = null, sources = [], looked = [], kind = "tv";
+let lib = {files: {}};
+// ---------- channel numbering -> Sonarr numbering ----------
+// Fan channels often count seasons differently from TVDB (Demon Slayer: channel S2 = TVDB S2 + S3). Episodes keep
+// the same overall order, so "continuous" mode counts channel episodes across seasons and maps them onto TVDB's
+// absolute order. "auto" keeps the posted numbers when every channel season has TVDB's episode count.
+let tvdbEps = null, epIdx = null, numMode = "auto", seasonSizes = {};
+function indexEps(eps) {
+  epIdx = {bySE: new Map(), byAbs: new Map(), count: {}};
+  for (const e of eps) {
+    epIdx.bySE.set(`${e.s}-${e.e}`, e); epIdx.byAbs.set(e.abs, e);
+    epIdx.count[e.s] = (epIdx.count[e.s] || 0) + 1;
+  }
+}
+function autoMode(sid) {
+  const sz = seasonSizes[sid] || {}, ss = Object.keys(sz).map(Number);
+  if (!epIdx || !ss.length) return {mode: "posted", why: ""};
+  // only a channel season with MORE episodes than Sonarr's proves different season boundaries; fewer just means
+  // something wasn't posted (or was filtered), which must not shift every later episode
+  const bad = ss.sort((a, b) => a - b).find(n => sz[n] > (epIdx.count[n] || 0));
+  return bad == null ? {mode: "posted", why: "Every channel season fits inside Sonarr's season of the same number, so the posted numbers are used."}
+    : {mode: "continuous", why: `Channel season ${bad} has ${sz[bad]} episodes but Sonarr's season ${bad} has ${epIdx.count[bad] || 0}, so episodes are counted continuously and matched to Sonarr's order.`};
+}
+const modeFor = sid => numMode === "auto" ? autoMode(sid).mode : numMode;
+function mapEp(f) {
+  if (kind !== "tv" || f.kind !== "video" || f.episode == null) return null;
+  const ps = f.season ?? 1, pe = f.episode;
+  if (!epIdx) return {s: ps, e: pe, ok: null};
+  let ep;
+  if (modeFor(f.source_id) === "continuous") {
+    const sz = seasonSizes[f.source_id] || {};
+    const off = Object.entries(sz).reduce((a, [k, v]) => +k < ps ? a + v : a, 0);
+    ep = epIdx.byAbs.get(off + pe);
+  } else ep = epIdx.bySE.get(`${ps}-${pe}`);
+  return ep ? {s: ep.s, e: ep.e, title: ep.title, ok: true, moved: ep.s !== ps || ep.e !== pe} : {s: ps, e: pe, ok: false};
+}
+function mapNote(f) {
+  const m = mapEp(f);
+  if (!m || m.ok == null) return "";
+  if (!m.ok) return `<span class="map bad">No matching episode in Sonarr</span>`;
+  return `<span class="map ${m.moved ? "moved" : ""}">→ <b>S${pad(m.s)}E${pad(m.e)}</b>${m.title ? ` · ${esc(m.title)}` : ""}</span>`;
+}
+async function loadEps() {
+  tvdbEps = epIdx = null;
+  if (kind !== "tv" || !target?.tvdbId) return;
+  const t = target;
+  try { const eps = await api(`/episodes?tvdbId=${t.tvdbId}`); if (t === target) { tvdbEps = eps; indexEps(eps); } }
+  catch (e) { if (t === target) toast(`Couldn't load Sonarr's episode list: ${e.message}`, true); }
+  if (t === target) { drawChosen(); render(); maybeAutoLink(); }
+}
+window.setNum = m => {
+  numMode = m; drawChosen(); render();
+  const s = sources.find(s => s.id === $("#fsrc").value);
+  if (s?.tvdbId && s.tvdbId === target?.tvdbId) api(`/sources/${s.id}`, {method: "PATCH", body: {numbering: m}, quiet: true}).then(loadSources).catch(() => {});
+};
+const libKey = f => { if (kind !== "tv") return "movie"; const m = mapEp(f); return m ? `${m.s}-${m.e}` : `${f.season ?? 1}-${f.episode}`; };
+const inLib = f => f.kind === "video" && (kind === "movie" || f.episode != null) ? lib.files[libKey(f)] : null;
+const openBatches = new Set(store.get("tgarr.open", []));
+
+// ---------- theme: system -> light -> dark ----------
+const THEMES = {system: ["auto", "Theme: follows your device"], light: ["sun", "Theme: light"], dark: ["moon", "Theme: dark"]};
+function applyTheme(t) {
+  if (t === "system") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = t;
+  const [icon, label] = THEMES[t];
+  $("#themeBtn").innerHTML = I(icon);
+  $("#themeBtn").setAttribute("aria-label", label + " (tap to change)");
+  $("#themeBtn").title = label;
+  // browser UI colour follows the effective theme
+  const dark = t === "dark" || (t === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+  $$('meta[name="theme-color"]').forEach(m => { m.media = "all"; m.content = dark ? "#0b1120" : "#f5f7fb"; });
+}
+let theme = store.get("tgarr.theme", "system");
+if (!THEMES[theme]) theme = "system";
+applyTheme(theme);
+$("#themeBtn").onclick = () => {
+  theme = {system: "light", light: "dark", dark: "system"}[theme];
+  store.set("tgarr.theme", theme);
+  if (document.startViewTransition && !reduceMotion.matches && !document.hidden) document.startViewTransition(() => applyTheme(theme)).ready.catch(() => {});
+  else applyTheme(theme);
+  toast(THEMES[theme][1]);
+};
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => theme === "system" && applyTheme(theme));
+
+// ---------- tabs ----------
+function showTab(name) {
+  const swap = () => {
+    $$(".tab").forEach(t => t.setAttribute("aria-selected", t.dataset.tab === name));
+    $$(".view").forEach(v => v.classList.toggle("on", v.id === name));
+  };
+  if (document.startViewTransition && !reduceMotion.matches && !document.hidden && $(".view.on")?.id !== name) {
+    const vt = document.startViewTransition(swap);
+    vt.ready.catch(() => {}); vt.finished.catch(() => {});  // skipped transitions (hidden tab etc.) just swap
+  } else swap();
+  selInfo();
+  if (name === "jobs") loadJobs();
+  if (name === "wanted") loadWanted();
+  history.replaceState(null, "", "#" + name);
+}
+$$(".tab").forEach(t => t.onclick = () => showTab(t.dataset.tab));
+
+// ---------- health ----------
+async function status() {
+  try {
+    const s = await api("/status", {quiet: true}), t = s.telegram;
+    const good = v => v && !String(v).startsWith("error") && v !== "not configured";
+    const dot = (name, ok, title) => `<span class="dot ${ok ? "ok" : ""}" title="${esc(name + ": " + title)}"><span class="lbl">${name}</span><span class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">${ok ? "" : name + " down"}</span></span>`;
+    $("#health").innerHTML = dot("Telegram", t.authorized, t.me || t.error || "") + dot("Sonarr", good(s.sonarr), s.sonarr) +
+      dot("Radarr", good(s.radarr), s.radarr) + dot("Plex", good(s.plex), s.plex);
+  } catch (e) { $("#health").innerHTML = `<span class="dot" title="${esc(e.message)}"><span class="lbl">offline</span></span>`; }
+}
+
+// ---------- sources ----------
+async function loadSources() {
+  sources = await api("/sources");
+  $("#slist").innerHTML = sources.map(s => `<div class="src">
+      ${avatar(s.chat_id, s.title || s.link)}
+      <div class="t"><b dir="auto">${esc(s.title || "Unknown")}</b>
+        <small>${s.tvdbId ? `<span class="linked">${I("link")} ${esc(s.series_title || "linked")}</span><button class="linkbtn" onclick="unlinkSrc('${s.id}')" title="Sonarr searches will stop using this channel">unlink</button>`
+          : s.kind !== "movie" ? `<span class="unlinked">Not linked to a series yet. Pick its series in Find and download once.</span>` : esc(s.link)}${s.note ? " · " + esc(s.note) : ""}</small></div>
+      <span class="tag">${{tv: "TV", movie: "Movies", any: "Mixed"}[s.kind] || esc(s.kind)}</span>
+      ${s.joined ? `<span class="tag ok">Member</span>` : `<button class="btn" onclick="joinSrc('${s.id}', this)">Join</button>`}
+      <button class="icon-btn danger" onclick="delSrc('${s.id}', this)" aria-label="Remove source">${I("trash")}</button>
+    </div>`).join("") || `<div class="empty">No sources yet. Paste a Telegram link above.</div>`;
+  const cur = $("#fsrc").value;
+  $("#fsrc").innerHTML = `<option value="" disabled>Choose a source…</option>` +
+    sources.map(s => `<option value="${s.id}" data-av="${esc(s.title || s.link)}" data-chat="${s.chat_id ?? ""}">${esc(s.title || s.link)}</option>`).join("") +
+    `<option value="*">All sources (search)</option>`;
+  $("#fsrc").value = sources.some(s => s.id === cur) || cur === "*" ? cur : "";  // nothing preselected after a refresh
+}
+$("#sadd").onclick = async e => {
+  const btn = e.currentTarget, link = $("#slink").value.trim();
+  if (!link) return $("#slink").focus();
+  busy(btn, true); $("#smsg").textContent = "";
+  try {
+    const s = await api("/sources", {method: "POST", body: {link, kind: $("#skind").value, note: $("#snote").value}});
+    toast(`Added “${s.title}”`);
+    $("#smsg").textContent = s.joined ? "" : "You're not a member yet. Press Join.";
+    $("#slink").value = $("#snote").value = ""; await loadSources();
+  } catch (err) { $("#smsg").innerHTML = `<span class="err">${esc(err.message)}</span>`; }
+  busy(btn, false);
+};
+window.joinSrc = async (id, btn) => { busy(btn, true); try { await api(`/sources/${id}/join`, {method: "POST"}); toast("Joined"); loadSources(); } catch (e) { toast(e.message, true); busy(btn, false); } };
+window.delSrc = async (id, btn) => {
+  const s = sources.find(s => s.id === id);
+  if (!await ask({title: "Remove source?", danger: true, ok: "Remove",
+    body: `<p><b dir="auto">${esc(s?.title || s?.link || "")}</b> will be removed from tgarr.</p><p>You stay a member of the channel in Telegram, and nothing downloaded is touched.</p>`})) return;
+  busy(btn, true);
+  try { await api(`/sources/${id}`, {method: "DELETE"}); toast("Source removed"); await loadSources(); }
+  catch (e) { toast(e.message, true); busy(btn, false); }
+};
+
+// chat photo with coloured-initial fallback
+const avatar = (chatId, title) => `<span class="av" style="background:${avColor(title)}">${avChar(title)}${chatId != null
+  ? `<img src="/api/avatar/${chatId}" alt="" loading="lazy" onerror="this.remove()">` : ""}</span>`;
+
+// ---------- fancy select ----------
+// Wraps a native <select> with a styled button + menu. The <select> keeps the value and fires "change",
+// so existing code (including `sel.value = x` and rebuilding its options) keeps working.
+const avColor = t => AV[[...(t || "")].reduce((a, c) => a + c.codePointAt(0), 0) % AV.length];
+const avChar = t => esc([...(t || "?").replace(/[^\p{L}\p{N}]/gu, "")][0] || "?");
+function fancy(sel) {
+  const wrap = document.createElement("div");
+  wrap.className = "fsel " + sel.className;
+  wrap.style.cssText = sel.style.cssText;
+  sel.style.cssText = ""; sel.className = "native"; sel.tabIndex = -1;
+  sel.before(wrap); wrap.append(sel);
+  const btn = document.createElement("button");
+  btn.type = "button"; btn.className = "fsel-btn"; btn.setAttribute("aria-haspopup", "listbox");
+  btn.setAttribute("aria-label", sel.getAttribute("aria-label") || sel.closest("label")?.querySelector("span")?.textContent || "");
+  const menu = document.createElement("div");
+  menu.className = "fsel-menu"; menu.setAttribute("role", "listbox");
+  wrap.append(btn, menu);
+  let active = -1;
+  const opts = () => [...sel.options].filter(o => !o.hidden);
+  const label = () => {
+    const o = sel.selectedOptions[0];
+    btn.innerHTML = `${o && !o.disabled && o.dataset.av != null ? avatar(o.dataset.chat || null, o.dataset.av) : ""}<span class="fsel-v ${!o || o.disabled ? "ph" : ""}" dir="auto">${esc(o?.text || "")}</span><svg class="i chev" aria-hidden="true"><use href="#i-chev"/></svg>`;
+    btn.disabled = sel.disabled;
+  };
+  const build = () => {
+    menu.innerHTML = opts().map((o, i) => `<div role="option" class="fsel-opt ${i === active ? "active" : ""}" data-i="${i}"
+        aria-selected="${o.selected && !o.disabled}" aria-disabled="${o.disabled}">
+      ${o.dataset.av != null ? avatar(o.dataset.chat || null, o.dataset.av) : ""}
+      <span class="lbl" dir="auto">${esc(o.text)}</span>${o.selected && !o.disabled ? I("check") : ""}</div>`).join("");
+    label();
+  };
+  const place = () => {
+    const r = btn.getBoundingClientRect(), h = Math.min(320, menu.scrollHeight || 320), up = r.bottom + h + 12 > innerHeight && r.top > h;
+    menu.classList.toggle("up", up);
+    menu.style.left = Math.max(8, Math.min(r.left, innerWidth - Math.max(r.width, 220) - 8)) + "px";
+    menu.style.minWidth = r.width + "px"; menu.style.maxWidth = Math.min(480, innerWidth - 16) + "px";
+    menu.style.top = up ? "" : r.bottom + 6 + "px";
+    menu.style.bottom = up ? innerHeight - r.top + 6 + "px" : "";
+  };
+  const isOpen = () => wrap.classList.contains("open");
+  const open = on => {
+    if (on === isOpen()) return;
+    if (on) { active = opts().findIndex(o => o.selected); build(); place(); menu.querySelector(".active")?.scrollIntoView({block: "nearest"}); }
+    wrap.classList.toggle("open", on);
+    btn.setAttribute("aria-expanded", on);
+  };
+  const choose = i => {
+    const o = opts()[i];
+    if (!o || o.disabled) return;
+    open(false);
+    if (sel.value !== o.value) { sel.value = o.value; sel.dispatchEvent(new Event("change", {bubbles: true})); }
+    btn.focus();
+  };
+  btn.onclick = () => open(!isOpen());
+  menu.onclick = e => { const el = e.target.closest(".fsel-opt"); if (el) choose(+el.dataset.i); };
+  btn.onkeydown = e => {
+    const n = opts().length;
+    if (["ArrowDown", "ArrowUp"].includes(e.key)) {
+      e.preventDefault();
+      if (!isOpen()) return open(true);
+      let i = active;
+      do { i = (i + (e.key === "ArrowDown" ? 1 : -1) + n) % n; } while (opts()[i]?.disabled && i !== active);
+      active = i; build(); menu.querySelector(".active")?.scrollIntoView({block: "nearest"});
+    } else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); isOpen() ? choose(active) : open(true); }
+    else if (e.key === "Escape" && isOpen()) { e.preventDefault(); e.stopPropagation(); open(false); }
+    else if (e.key === "Tab") open(false);
+  };
+  document.addEventListener("pointerdown", e => { if (!wrap.contains(e.target)) open(false); });
+  addEventListener("resize", () => open(false));
+  addEventListener("scroll", e => { if (isOpen() && !menu.contains(e.target)) open(false); }, true);
+  new MutationObserver(() => isOpen() ? build() : label()).observe(sel, {childList: true, subtree: true, attributes: true, characterData: true});
+  sel.addEventListener("change", label);
+  const d = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value");  // keep the button in sync with sel.value = x
+  Object.defineProperty(sel, "value", {get() { return d.get.call(this); }, set(v) { d.set.call(this, v); label(); }});
+  sel.focus = () => btn.focus();
+  label();
+}
+
+// ---------- wanted: requested series that a directory channel carries ----------
+let wantedList = [];
+async function loadWanted() {
+  try { wantedList = await api("/wanted", {quiet: true}); } catch (e) { $("#wlist").innerHTML = `<div class="empty err">${esc(e.message)}</div>`; return; }
+  $("#wantcount").textContent = wantedList.filter(w => !w.linked).length || "";
+  if (!$("#wanted").classList.contains("on")) return;
+  morph($("#wlist"), wantedList.map(w => {
+    const ch = w.entry ? [w.entry.en, ...(w.entry.he || [])].filter(Boolean).join(" · ") : "";
+    const mins = autoCfg?.fallback_minutes ?? 30, auto = autoCfg?.auto_join;
+    const due = w.demand ? Math.max(0, Math.ceil((w.demand + mins * 60 - Date.now() / 1000) / 60)) : null;
+    const state = w.linked ? `<span class="linked">${I("link")} Linked</span> ${
+          w.linked_at && w.demand && w.linked_at > w.demand && !w.searched_at ? `Sonarr will be asked to search again ${due ? `in about ${due} min` : "within a minute"}`
+          : "Sonarr searches this channel for it"}`
+      : w.joined ? `You're in its channel. It links itself within a minute`
+      : auto && w.demand ? `In a channel you haven't joined (<span dir="auto">${esc(ch)}</span>). ${!autoCfg.joins_left_today ? "Today's join limit is reached, so tgarr joins it tomorrow" : due ? `If your trackers still have nothing in about ${due} min, tgarr joins it and downloads from there` : "Your trackers had nothing, so tgarr is joining it now"}`
+      : auto ? `In a channel you haven't joined (<span dir="auto">${esc(ch)}</span>). Not requested recently, so tgarr leaves it alone. Press the button to get it`
+      : `Available in a channel you haven't joined: <span dir="auto">${esc(ch)}</span>`;
+    const btn = w.linked ? `<button class="btn" onclick="wantSearch(${w.tvdbId}, this)">${I("search")}Search now</button>`
+      : `<button class="btn" onclick="wantGet(${w.tvdbId}, this)" title="Skip the wait">${I("dl")}${w.joined ? "Link & get it now" : "Join & get it now"}</button>`;
+    return `<div class="want" data-key="${w.tvdbId}"><div class="img" style="background-image:url('${esc(w.poster || "")}')"></div>
+      <div><b>${esc(w.title)} <span style="color:var(--mute);font-weight:400">${w.year || ""}</span></b>
+        <small>${plural(w.missing, "episode")} missing</small><small>${state}</small></div>
+      <div class="act">${btn}</div></div>`;
+  }).join("") || `<div class="empty">Nothing waiting. When you request a show that one of your directory channels has, it appears here.</div>`);
+}
+window.wantGet = async (tvdbId, btn) => {
+  const w = wantedList.find(w => w.tvdbId === tvdbId);
+  if (!w) return;
+  const ch = w.entry ? [w.entry.en, ...(w.entry.he || [])].filter(Boolean).join(" · ") : w.title;
+  if (!await ask({title: w.joined ? "Link and get it?" : "Join this channel and get it?", icon: "dl", ok: w.joined ? "Link & get it" : "Join & get it",
+    body: `<div class="m-sum"><div class="img" style="background-image:url('${esc(w.poster || "")}')"></div><div><b>${esc(w.title)}</b><br>${plural(w.missing, "episode")} missing</div></div>
+      <ul>${w.joined ? "" : `<li>Your Telegram account joins the channel <b dir="auto">${esc(ch)}</b></li>`}
+      <li>The channel is added to Sources and linked to this series</li>
+      <li>Sonarr searches for the missing episodes right away. It still prefers a torrent if it finds one, otherwise it downloads from Telegram</li></ul>`})) return;
+  busy(btn, true);
+  try {
+    const r = await api(`/wanted/${tvdbId}/get`, {method: "POST"});
+    toast(`${r.title}: ${plural(r.releases, "episode")} found, Sonarr is searching`); buzz();
+    await loadSources(); loadInteg();
+  } catch (e) { toast(e.message, true); }
+  busy(btn, false); loadWanted();
+};
+window.wantSearch = async (tvdbId, btn) => {
+  busy(btn, true);
+  try { await api(`/wanted/${tvdbId}/search`, {method: "POST"}); toast("Sonarr is searching. Watch the Jobs tab."); } catch (e) { toast(e.message, true); }
+  busy(btn, false);
+};
+
+// ---------- Sonarr / Prowlarr integration panel ----------
+const ago = ts => { const s = Math.max(0, Date.now() / 1000 - ts); return s < 90 ? "just now" : s < 5400 ? `${Math.round(s / 60)} min ago` : `${Math.round(s / 3600)} h ago`; };
+let integShowKey = false;
+let autoCfg = null;
+async function loadInteg() {
+  let d;
+  try { [d, autoCfg] = await Promise.all([api("/integration", {quiet: true}), api("/settings", {quiet: true})]); } catch { return; }
+  const total = d.index.reduce((a, i) => a + i.releases, 0);
+  $("#integ").innerHTML = `<h2>Sonarr integration</h2>
+    <div class="hint" style="margin-top:0">Linked channels are searchable from Sonarr (through Prowlarr) as the indexer <b>tgarr (Telegram)</b>.
+      Sonarr tries your torrent trackers first and falls back to these after its delay.</div>
+    <label class="repl" style="margin:12px 0 4px"><input type="checkbox" class="chk" id="autoJoin" ${autoCfg.auto_join ? "checked" : ""}>
+      <span><b>Hands-off mode: join channels for me</b>
+      <small>When Sonarr searches for a show that one of your directory channels carries, tgarr joins that channel, links it and
+        has Sonarr search again, but only if your trackers still have nothing ${autoCfg.fallback_minutes} minutes after the request. At most ${autoCfg.max_joins_per_day} joins a day
+        (${autoCfg.joins_left_today} left today). Off: use the Wanted tab's "Join &amp; get it" button instead.</small></span></label>
+    ${autoCfg.log.length ? `<details class="autolog"><summary>Recent automatic activity (${autoCfg.log.length})</summary>
+      ${autoCfg.log.slice(0, 12).map(l => `<div><span>${ago(l.at)}</span> ${esc(l.text)}</div>`).join("")}</details>` : ""}
+    ${d.index.map(i => `<div class="integ-row"><span>${I("link")}</span><span><b>${esc(i.series || "?")}</b>${i.error ? ` <span class="err">${esc(i.error)}</span>` : ""}</span>
+      <span class="n">${plural(i.releases, "episode")} · ${i.at ? ago(i.at) : "not scanned yet"}</span></div>`).join("")
+      || `<div class="empty">No linked channels yet.</div>`}
+    <div class="row" style="margin-top:12px">
+      <span class="hint" style="margin:0">${total} episodes indexed · refreshes every 10 min</span>
+      <button class="btn" style="margin-left:auto" id="integRefresh">${I("retry")}Refresh now</button>
+      <button class="btn" id="integKey">${integShowKey ? "Hide" : "Show"} connection details</button>
+    </div>
+    ${integShowKey ? `<div class="kv"><span>Prowlarr · Generic Newznab URL</span><code>${esc(d.newznab_url)}</code>
+      <span>Sonarr · SABnzbd host / port / URL base</span><code>${esc(d.sab_host)} / ${d.sab_port} / ${esc(d.sab_url_base)}</code>
+      <span>API key (both)</span><code>${esc(d.apikey)}</code>
+      <span>Download folder</span><code>${esc(d.download_dir)}</code></div>` : ""}`;
+  $("#integRefresh").onclick = async e => { const b = e.currentTarget; busy(b, true); try { await api("/integration/refresh", {method: "POST"}); toast("Index refreshed"); } catch (err) { toast(err.message, true); } await loadInteg(); };
+  $("#integKey").onclick = () => { integShowKey = !integShowKey; loadInteg(); };
+  $("#autoJoin").onchange = async e => {
+    try { await api("/settings", {method: "PUT", body: {auto_join: e.target.checked}}); toast(e.target.checked ? "Hands-off mode on" : "Hands-off mode off"); }
+    catch (err) { toast(err.message, true); }
+    loadInteg(); loadWanted();
+  };
+}
+window.unlinkSrc = async id => {
+  const s = sources.find(s => s.id === id);
+  if (!await ask({title: "Unlink this channel?", icon: "link", ok: "Unlink",
+    body: `<p><b dir="auto">${esc(s?.title || "")}</b> is linked to <b>${esc(s?.series_title || "")}</b>.</p><p>Sonarr will stop finding episodes from it. The channel stays in your sources and you can still download by hand.</p>`})) return;
+  try { await api(`/sources/${id}`, {method: "PATCH", body: {unlink: true}}); toast("Unlinked"); } catch (e) { toast(e.message, true); }
+  await loadSources(); loadInteg();
+};
+// remember which series a channel belongs to once the user has confirmed it by downloading from it
+async function linkSources(items) {
+  if (kind !== "tv" || !target?.tvdbId) return;
+  for (const sid of new Set(items.map(f => f.source_id))) {
+    const s = sources.find(s => s.id === sid);
+    if (!s || s.tvdbId === target.tvdbId) continue;
+    if (s.tvdbId) continue;  // already linked to another series: don't silently repoint it
+    try { await api(`/sources/${sid}`, {method: "PATCH", body: {tvdbId: target.tvdbId, numbering: numMode}, quiet: true}); } catch {}
+  }
+  await loadSources(); loadInteg();
+}
+
+// ---------- pick from my chats ----------
+const AV = ["#2563eb", "#7c3aed", "#db2777", "#ea580c", "#0d9488", "#4f46e5", "#16a34a", "#c026d3"];
+let pickT, pickSeq = 0;
+async function loadChats() {
+  const seq = ++pickSeq, q = $("#pq").value.trim();
+  if (!$("#plist").children.length || !q) $("#plist").innerHTML = Array.from({length: 6}, () =>
+    `<div class="skel" style="grid-template-columns:40px 1fr;border:0"><i class="box" style="width:40px;height:40px;border-radius:50%;margin:0"></i><div><i></i><i></i></div></div>`).join("");
+  try {
+    const chats = await api(`/dialogs?q=${encodeURIComponent(q)}`);
+    if (seq !== pickSeq) return;
+    const have = new Set(sources.map(s => s.chat_id));
+    morph($("#plist"), chats.map((c, n) => `<button class="pchat" data-key="${c.chat_id}" style="--i:${n}" ${have.has(c.chat_id) ? "disabled" : ""}
+        onclick="addChat(${c.chat_id}, this)">
+      ${avatar(c.chat_id, c.title)}
+      <span class="t"><b dir="auto">${esc(c.title)}</b><small>${c.kind}${c.members ? ` · ${c.members.toLocaleString()} members` : ""}${c.username ? ` · @${esc(c.username)}` : " · private"}</small></span>
+      ${have.has(c.chat_id) ? `<span class="tag ok">Added</span>` : I("plus")}
+    </button>`).join("") || `<div class="empty">${q ? "No group or channel matches." : "You're not in any groups or channels."}</div>`);
+  } catch (e) { if (seq === pickSeq) $("#plist").innerHTML = `<div class="empty err">${esc(e.message)}</div>`; }
+}
+$("#spick").onclick = () => { $("#pq").value = ""; $("#pkind").value = $("#skind").value; $("#plist").innerHTML = ""; $("#picker").showModal(); $("#pq").focus(); loadChats(); };
+$("#pClose").onclick = () => $("#picker").close();
+$("#picker").addEventListener("click", e => { if (e.target === $("#picker")) $("#picker").close(); });
+$("#pq").oninput = () => { clearTimeout(pickT); pickT = setTimeout(loadChats, 300); };
+window.addChat = async (id, btn) => {
+  busy(btn, true);
+  try {
+    const s = await api("/sources", {method: "POST", body: {link: `tg:${id}`, kind: $("#pkind").value, note: ""}});
+    toast(`Added “${s.title}”`); buzz();
+    await loadSources(); loadChats();
+  } catch (e) { toast(e.message, true); busy(btn, false); }
+};
+
+// ---------- find ----------
+// Channel names look like "[AnimeIL-TV] - דימון סלייר / הלהב קוטל השדים - אנימה אייאל טיוי": several names for the
+// show plus tags. Split into candidate titles (tags dropped), English first.
+function titleCandidates(name) {
+  const parts = (name || "").replace(/\[[^\]]*\]|\([^)]*\)/g, " ").split(/\s+[-–|]\s+|\s*\/\s*/)
+    .map(x => x.replace(/^[\s\-–|:]+|[\s\-–|:]+$/g, "").trim()).filter(x => x.length > 1);
+  const latin = parts.filter(x => /[a-z]{3}/i.test(x)), other = parts.filter(x => !/[a-z]{3}/i.test(x));
+  // translated names often carry a leading article/word ("הלהב קוטל השדים"): also try the phrase without it
+  const shorter = other.flatMap(x => { const w = x.split(/\s+/); return w.length >= 3 ? [w.slice(1).join(" ")] : []; });
+  return [...new Set([...latin, ...other, ...shorter])].slice(0, 6);
+}
+// directory channels give an English title for channels named in another language
+let catalogEntries = [];
+async function loadCatalog() { try { catalogEntries = (await api("/catalog", {quiet: true})).entries || []; } catch {} }
+const catalogFor = s => catalogEntries.find(e => e.url === s.link)
+  || catalogEntries.find(e => (e.he || []).some(h => h.length >= 4 && (s.title || "").includes(h)));
+let pickTrust = "guess";  // how the current series was chosen: "exact" title match, "user" tap, or a "guess"
+async function lookupFromSource() {
+  const s = sources.find(s => s.id === $("#fsrc").value);
+  if (!s) return;
+  if (s.kind !== "any") setKind(s.kind);
+  if (kind === "tv" && s.tvdbId) {
+    target = null; drawChosen(); numMode = s.numbering || "auto";
+    const btn = $("#lgo"), seq = ++lookSeq;
+    busy(btn, true);
+    try {
+      const res = await api(`/lookup?kind=tv&term=${encodeURIComponent("tvdb:" + s.tvdbId)}`);
+      if (seq !== lookSeq) return;
+      looked = res; $("#lt").value = res[0]?.title || s.series_title || "";
+      $("#targets").innerHTML = looked.map((t, i) => `<button class="poster" aria-pressed="false" onclick="pick(${i})">
+        <div class="img" style="background-image:url('${esc(t.poster || "")}')"></div>
+        <b>${esc(t.title)}</b><span style="color:var(--mute)">${t.year || ""}${t.inLibrary ? " · in library" : ""}</span></button>`).join("");
+      if (looked.length) pick(0, true);
+    } catch (e) { toast(e.message, true); }
+    finally { if (seq === lookSeq) busy(btn, false); }
+    return;
+  }
+  const listed = catalogFor(s)?.en;
+  const cands = listed ? [listed, ...titleCandidates(s.title)] : titleCandidates(s.title);
+  if (!cands.length) return;
+  target = null; drawChosen(); numMode = "auto";
+  if (/[a-z]{3}/i.test(cands[0])) { $("#lt").value = cands[0]; return lookup(true); }  // English title: normal search
+  // Only non-English names: search each and vote. A single phrase can mislead (דימון סלייר -> Goblin Slayer),
+  // a show that ranks well for several of the channel's names is far more likely right.
+  const btn = $("#lgo"), seq = ++lookSeq;
+  busy(btn, true);
+  try {
+    const results = await Promise.all(cands.map(c => api(`/lookup?kind=${kind}&term=${encodeURIComponent(c)}`).catch(() => [])));
+    if (seq !== lookSeq) return;
+    const id = t => t.tvdbId ?? t.tmdbId, score = new Map(), byId = new Map();
+    results.forEach(list => list.forEach((t, rank) => {
+      score.set(id(t), (score.get(id(t)) || 0) + 1 / (rank + 1) + (t.inLibrary ? 0.25 : 0));
+      byId.set(id(t), t);
+    }));
+    looked = [...byId.values()].sort((a, b) => score.get(id(b)) - score.get(id(a))).slice(0, 12);
+    // strongest signal for TV: how well each candidate's episode count fits what the channel posted
+    const sz = seasonSizes[s.id] || s.season_sizes || {}, chTotal = Object.values(sz).reduce((a, b) => a + b, 0);
+    if (kind === "tv" && chTotal) {
+      await Promise.all(looked.slice(0, 6).map(async t => {
+        try {
+          const n = (await api(`/episodes?tvdbId=${t.tvdbId}`, {quiet: true})).length;
+          const fit = n ? Math.min(n, chTotal) / Math.max(n, chTotal) : 0;  // 1.0 = same number of episodes
+          score.set(id(t), score.get(id(t)) + 3 * fit);
+        } catch {}
+      }));
+      if (seq !== lookSeq) return;
+      looked.sort((a, b) => score.get(id(b)) - score.get(id(a)));
+    }
+    $("#lt").value = looked[0]?.title || cands[0];
+    $("#targets").innerHTML = looked.map((t, i) => `<button class="poster" aria-pressed="false" onclick="pick(${i})">
+      <div class="img" style="background-image:url('${esc(t.poster || "")}')"></div>
+      <b>${esc(t.title)}</b><span style="color:var(--mute)">${t.year || ""}${t.inLibrary ? " · in library" : ""}</span></button>`).join("")
+      || `<div class="hint">No match. Search the English title above.</div>`;
+    if (looked.length && !target) { pick(0, true); pickTrust = "guess"; }  // voted from non-English names: never auto-link
+  } finally { if (seq === lookSeq) busy(btn, false); }
+}
+$("#fsrc").onchange = () => {
+  files = []; issue = null; target = null; looked = []; $("#lt").value = ""; $("#targets").innerHTML = ""; drawChosen(); render();
+  if ($("#fsrc").value !== "*") autoScan(); else $("#fq").focus();  // the scan's end runs lookupFromSource()
+};
+// a chosen source is scanned right away (search text, if any, still applies)
+const autoScan = () => { if ($("#fsrc").value && !$("#fgo").disabled) $("#fgo").click(); };
+$("#fgo").onclick = async e => {
+  const btn = e.currentTarget, pick = $("#fsrc").value, src = pick === "*" ? "" : pick, q = $("#fq").value.trim();
+  if (!pick) { $("#fmsg").innerHTML = `<span class="err">Choose a source first.</span>`; $("#fsrc").focus(); return; }
+  if (!src && !q) { $("#fmsg").innerHTML = `<span class="err">Searching all sources needs search text.</span>`; $("#fq").focus(); return; }
+  busy(btn, true); $("#fmsg").textContent = "Scanning Telegram…";
+  $("#files").innerHTML = Array.from({length: 6}, () => `<div class="skel"><i class="box"></i><div><i></i><i></i></div></div>`).join("");
+  try {
+    const r = await api(`/files?source=${encodeURIComponent(src)}&q=${encodeURIComponent(q)}`);
+    files = r.files.map(f => ({...f, sel: false}));
+    Object.assign(seasonSizes, r.season_sizes || {});
+    files.sort((a, b) => a.source_id === b.source_id ? a.msg_id - b.msg_id : a.source_id < b.source_id ? -1 : 1);
+    $("#fmsg").innerHTML = `Found ${files.length} file${files.length === 1 ? "" : "s"}.` + r.errors.map(x => `<div class="err">${esc(x)}</div>`).join("");
+    if (!target) $("#lt").value.trim() ? lookup(true) : sources.some(s => s.id === src) && lookupFromSource();
+    render();
+    maybeAutoLink();
+  } catch (err) { $("#fmsg").innerHTML = `<span class="err">${esc(err.message)}</span>`; }
+  busy(btn, false);
+};
+// braces matter: a handler property returning false (as `a && b` does) cancels the keystroke
+$("#fq").onkeydown = e => { if (e.key === "Enter") $("#fgo").click(); };
+
+function render() {
+  const nx = files.filter(f => f.extra).length;
+  $("#extrasWrap").style.display = nx ? "" : "none";
+  $("#extrasLbl").textContent = `Show extras (${nx})`;
+  const vis = issue ? files.filter(ISSUES[issue].test)
+    : files.filter(f => (!$("#onlyvid").checked || f.kind !== "subtitle") && ($("#showx").checked || !f.extra || f.sel));
+  morph($("#files"), vis.map((f, n) => { const i = files.indexOf(f); return `
+    <div class="file ${f.sel ? "sel" : ""}" data-key="${esc(f.source_id)}:${f.msg_id}" style="--i:${n}">
+      <label class="pick" title="${inLib(f) && !f.sel ? "In library: tick to replace" : ""}"><input type="checkbox" class="chk" data-i="${i}" ${f.sel ? "checked" : ""} onchange="toggle(${i}, this.checked)" aria-label="Select ${esc(f.name)}"></label>
+      <div><div class="name">${esc(f.name)}</div>${f.caption ? `<div class="cap" dir="auto">${esc(f.caption)}</div>` : ""}</div>
+      <div class="meta">
+        ${f.kind !== "video" ? `<span class="tag">${f.kind}</span>` : ""}${f.extra ? `<span class="tag warnt" title="${esc(f.extra)}">extra · ${esc(f.extra)}</span>` : ""}
+        ${(x => x ? `<span class="tag ${f.sel ? "badt" : "ok"}" title="${esc(x.path || "")}">${f.sel ? "Will replace" : "In library"} · ${esc(x.quality || "?")} · ${fmt(x.size)}</span>` : "")(inLib(f))}
+        <span>${fmt(f.size)}</span>${f.height ? `<span>${f.height}p</span>` : ""}<span>${f.date.slice(0, 10)}</span>
+        ${sources.length > 1 ? `<span dir="auto">${esc(f.source_title || "")}</span>` : ""}
+        ${kind === "tv" && f.kind === "video" ? `
+          <span class="se"><label for="s${i}">S</label><input id="s${i}" class="${chk(f.season, f.season_src)}" type="number" inputmode="numeric" min="0" value="${f.season ?? ""}" onchange="edit(${i},'season',this.value)"></span>
+          <span class="se"><label for="e${i}">E</label><input id="e${i}" class="${chk(f.episode, f.episode_src, f.duplicate)}" type="number" inputmode="numeric" min="0" value="${f.episode ?? ""}" onchange="edit(${i},'episode',this.value)"></span>
+          <span class="src-note">${srcNote(f)}</span>${mapNote(f)}` : ""}
+      </div>
+    </div>`; }).join("") || `<div class="empty">${files.length ? "Only subtitles here." : "Nothing found."}</div>`);
+  $$("#files .chk[data-i]").forEach(c => { const f = files[+c.dataset.i]; if (f) c.indeterminate = !f.sel && !!inLib(f); });  // rows still fading out have no file
+  drawMissing();
+  selInfo();
+}
+window.toggle = (i, on) => { files[i].sel = on; buzz(); render(); };
+// values the user should double-check: guessed from a bare number, inherited from context, missing, or colliding
+const chk = (v, src, dup) => v == null || dup ? "check" : src === "guess" || src === "context" ? "check" : "";
+const SRC = {caption: "caption", filename: "file name", context: "earlier post", guess: "guessed", user: "you"};
+function srcNote(f) {
+  if (f.extra) return "";  // not treated as an episode, so no episode warnings
+  if (f.duplicate) return `<span class="warn">same episode as another file</span>`;
+  if (f.episode == null) return `<span class="warn">episode unknown</span>`;
+  const a = SRC[f.season_src], b = SRC[f.episode_src];
+  if (!a && !b) return "";
+  return "from " + (a === b || !a ? b : !b ? a : `${a} / ${b}`);
+}
+window.edit = (i, k, v) => { files[i][k] = v === "" ? null : +v; files[i][k + "_src"] = "user"; files[i].duplicate = false; render(); };
+function selInfo() {
+  const sel = files.filter(f => f.sel), onFind = $("#find").classList.contains("on");
+  $("#selbar").classList.toggle("on", onFind && sel.length > 0);
+  $("#selcount").innerHTML = `${sel.length} selected<small>${fmt(sel.reduce((a, f) => a + f.size, 0))}</small>`;
+  $(".selbar .tools").style.display = kind === "tv" ? "" : "none";
+  const lbl = $("#dllabel");  // absent while the button shows its spinner
+  if (lbl) lbl.textContent = target ? `Download as ${target.title.length > 22 ? target.title.slice(0, 22) + "…" : target.title}` : "Choose a title first";
+  const fresh = files.filter(f => !inLib(f));
+  $("#all").checked = fresh.length > 0 && fresh.every(f => f.sel);
+}
+// one file per episode you don't have yet (optionally one season); duplicates resolved by resolution, then size
+function missingFiles(season) {
+  const best = new Map();
+  for (const f of files) {
+    if (f.kind !== "video" || f.extra || (kind === "tv" && f.episode == null) || inLib(f)) continue;
+    if (season != null && (f.season ?? 1) !== season) continue;
+    const k = libKey(f), cur = best.get(k);
+    if (!cur || (f.height || 0) > (cur.height || 0) || ((f.height || 0) === (cur.height || 0) && f.size > cur.size)) best.set(k, f);
+  }
+  return [...best.values()];
+}
+const seasonsHere = () => [...new Set(files.filter(f => f.kind === "video" && f.episode != null).map(f => f.season ?? 1))].sort((a, b) => a - b);
+function drawMissing() {
+  const sel = $("#missSel"), tv = kind === "tv";
+  const all = missingFiles(null);
+  (sel.closest(".fsel") || sel).style.display = files.length ? "" : "none";
+  sel.innerHTML = `<option value="">${all.length ? `Select missing (${all.length})` : "Nothing missing"}</option>` +
+    (all.length ? (tv ? `<option value="all">All seasons · ${all.length}</option>` +
+      seasonsHere().map(s => { const n = missingFiles(s).length; return n ? `<option value="${s}">Season ${s} · ${n}</option>` : ""; }).join("")
+      : `<option value="all">The movie</option>`) : "");
+  sel.disabled = !all.length;
+  // coverage summary + clickable issue chips (each filters the list to exactly the files it's about)
+  if (!files.length) { $("#coverage").innerHTML = ""; return; }
+  const counts = Object.fromEntries(Object.keys(ISSUES).map(k => [k, files.filter(ISSUES[k].test).length]));
+  if (issue && !counts[issue]) issue = null;  // fixed them all: drop the filter
+  const chips = Object.entries(ISSUES).filter(([k]) => counts[k]).map(([k, d]) =>
+    `<button type="button" class="chip ${d.warn ? "warn" : ""}" aria-pressed="${issue === k}" onclick="setIssue('${k}')">${counts[k]} ${d.label}</button>`).join("");
+  const have = Object.keys(lib.files).length, ready = target && !lib.loading;
+  $("#coverage").innerHTML = (ready ? (tv
+    ? `<span>In library <b>${have}</b></span><span>Missing & available here <b>${all.length}</b></span>`
+    : `<span>${have ? "<b>Already in library</b>" : "<b>Not in library yet</b>"}</span>`) : "") + chips +
+    (issue ? `<span class="filtering">Showing only ${ISSUES[issue].label} · <button type="button" class="linkbtn" onclick="setIssue(null)">Show all</button></span>` : "");
+}
+// list filters for the issue chips; extras are counted on their own so the other warnings never point at hidden rows
+const ISSUES = {
+  extras: {label: "extras (trailers, clips…)", test: f => !!f.extra},
+  noep: {label: "without episode number", warn: true, test: f => kind === "tv" && f.kind === "video" && !f.extra && f.episode == null},
+  dupes: {label: "same episode twice", warn: true, test: f => kind === "tv" && f.kind === "video" && !f.extra && f.duplicate},
+  unmapped: {label: "not in Sonarr", warn: true, test: f => kind === "tv" && f.kind === "video" && !f.extra && mapEp(f)?.ok === false},
+};
+let issue = null;
+window.setIssue = k => { issue = issue === k ? null : k; render(); if (issue) $("#files").scrollIntoView({behavior: "smooth", block: "start"}); };
+$("#missSel").onchange = e => {
+  const v = e.target.value;
+  if (!v) return;
+  const pick = new Set(missingFiles(v === "all" ? null : +v));
+  files.forEach(f => f.sel = pick.has(f));
+  render();
+  toast(kind === "tv" ? `Selected ${plural(pick.size, "missing episode")}${v === "all" ? "" : ` in season ${v}`}` : "Selected the movie");
+};
+$("#all").onchange = e => { files.forEach(f => f.sel = e.target.checked && !inLib(f) && !f.extra); render(); };
+$("#showx").onchange = render;
+$("#onlyvid").onchange = render;
+$("#bulkSet").onclick = () => { const s = $("#bulkS").value; files.filter(f => f.sel).forEach(f => f.season = s === "" ? null : +s); render(); };
+$("#renum").onclick = () => { files.filter(f => f.sel && f.kind === "video").forEach((f, i) => f.episode = i + 1); render(); };
+
+function setKind(k, keepTerm) {
+  if (k === kind) return;
+  kind = k; target = null; looked = []; lib = {files: {}}; tvdbEps = epIdx = null;
+  $$(".seg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.kind === k));
+  $("#lt").placeholder = k === "tv" ? "Search Sonarr for the series" : "Search Radarr for the movie";
+  $("#targets").innerHTML = ""; $("#chosen").innerHTML = "";
+  render();
+}
+$$(".seg button").forEach(b => b.onclick = () => setKind(b.dataset.kind));
+const norm = t => (t || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+let lookSeq = 0, autoPicked = false;
+async function lookup(auto) {
+  const btn = $("#lgo"), term = $("#lt").value.trim(), seq = ++lookSeq;
+  if (!term) return $("#lt").focus();
+  busy(btn, true);
+  try {
+    const res = await api(`/lookup?kind=${kind}&term=${encodeURIComponent(term)}`);
+    if (seq !== lookSeq) return;  // a newer search is in flight
+    looked = res;
+    $("#targets").innerHTML = looked.map((t, i) => `<button class="poster" aria-pressed="false" onclick="pick(${i})">
+      <div class="img" style="background-image:url('${esc(t.poster || "")}')"></div>
+      <b>${esc(t.title)}</b><span style="color:var(--mute)">${t.year || ""}${t.inLibrary ? " · in library" : ""}</span></button>`).join("")
+      || `<div class="hint">No match. Try the English or Japanese title.</div>`;
+    // default to the best match: an exact title match always (preferring one already in the library);
+    // a looser "contains" match only for automatic lookups. Never overrides a title the user picked.
+    if (looked.length && (!target || autoPicked)) {
+      const q = norm(term), exact = looked.map((t, i) => i).filter(i => norm(looked[i].title) === q);
+      let best = exact.find(i => looked[i].inLibrary) ?? exact[0] ?? -1;
+      const exactHit = best >= 0;
+      if (best < 0 && auto) best = looked.findIndex(t => norm(t.title).includes(q) || q.includes(norm(t.title)));
+      if (best >= 0) { pick(best, true); pickTrust = exactHit ? "exact" : "guess"; maybeAutoLink(); }
+    }
+  } catch (err) { $("#targets").innerHTML = `<div class="hint err">${esc(err.message)}</div>`; }
+  finally { if (seq === lookSeq) busy(btn, false); }
+}
+$("#lgo").onclick = () => lookup(false);
+let typeT;
+$("#lt").oninput = () => { clearTimeout(typeT); typeT = setTimeout(() => $("#lt").value.trim().length > 2 && lookup(false), 600); };
+$("#lt").onkeydown = e => { if (e.key === "Enter") { clearTimeout(typeT); lookup(false); } };
+async function loadLib() {
+  lib = {files: {}, loading: true};
+  if (!target) return;
+  drawChosen();
+  const t = target;
+  try { const r = await api(`/library?kind=${kind}&id=${kind === "tv" ? t.tvdbId : t.tmdbId}`); if (t === target) lib = r; }
+  catch (e) { if (t === target) { lib = {files: {}}; toast(`Library check failed: ${e.message}`, true); } }
+  if (t === target) { drawChosen(); render(); }
+}
+window.pick = (i, auto) => {
+  pickTrust = auto ? "guess" : "user";  // callers that know better (exact title match) raise it after picking
+  target = looked[i]; autoPicked = !!auto; lib = {files: {}};
+  $$(".poster").forEach((p, j) => p.setAttribute("aria-pressed", i === j));
+  drawChosen(); selInfo(); loadLib(); loadEps();
+};
+// link the selected channel to the chosen series so Sonarr can search it (no download needed)
+function linkHtml() {
+  const s = sources.find(s => s.id === $("#fsrc").value);
+  if (kind !== "tv" || !s || !target?.tvdbId) return "";
+  if (s.tvdbId === target.tvdbId)
+    return `<div class="numbering"><span class="linked">${I("link")} Linked for Sonarr</span>
+      <small>Sonarr can find this channel's episodes of ${esc(target.title)} when you request it (after trying your torrent trackers).</small></div>`;
+  return `<div class="numbering"><div class="row"><span style="font-weight:600;font-size:14px">${s.tvdbId ? `Linked to ${esc(s.series_title || "another series")}` : "Not linked for Sonarr yet"}</span>
+      <button class="btn primary" style="margin-left:auto" id="linkBtn" onclick="linkHere(this)">${I("link")}${s.tvdbId ? "Relink to" : "Link to"} ${esc(target.title.length > 26 ? target.title.slice(0, 26) + "…" : target.title)}</button></div>
+    <small>Linking lets Sonarr (and Overseerr requests) use this channel automatically. Check the episode numbers below look right first.</small></div>`;
+}
+// Link without asking when it's safe: one channel selected, not linked yet, a series chosen, and every episode
+// in the channel lands on a real Sonarr episode. Anything less clear-cut keeps the manual button.
+const autoLinkTried = new Set();
+async function maybeAutoLink() {
+  const s = sources.find(s => s.id === $("#fsrc").value);
+  if (kind !== "tv" || !s || s.tvdbId || !target?.tvdbId || !epIdx || !files.length) return;
+  if (pickTrust !== "exact" && pickTrust !== "user") return;  // a guessed series must be confirmed with the Link button
+  const eps = files.filter(f => f.source_id === s.id && f.kind === "video" && !f.extra);
+  const mapped = eps.filter(f => mapEp(f)?.ok === true).length;
+  const clean = eps.length >= 1 && mapped === eps.length && !eps.some(f => f.duplicate);
+  const key = `${s.id}:${target.tvdbId}`;
+  if (!clean || autoLinkTried.has(key)) return;
+  autoLinkTried.add(key);
+  try {
+    await api(`/sources/${s.id}`, {method: "PATCH", body: {tvdbId: target.tvdbId, numbering: numMode}, quiet: true});
+    toast(`Linked to ${target.title}: Sonarr can now find its ${plural(mapped, "episode")}`);
+    await loadSources(); loadInteg(); drawChosen();
+  } catch {}
+}
+window.linkHere = async btn => {
+  const s = sources.find(s => s.id === $("#fsrc").value);
+  if (!s || !target?.tvdbId) return;
+  busy(btn, true);
+  try {
+    await api(`/sources/${s.id}`, {method: "PATCH", body: {tvdbId: target.tvdbId, numbering: numMode}});
+    toast(`Linked to ${target.title}`); buzz();
+    await loadSources(); loadInteg(); drawChosen();
+  } catch (e) { toast(e.message, true); busy(btn, false); }
+};
+function numberingHtml() {
+  if (kind !== "tv" || !epIdx || !files.length) return "";
+  const sid = files.find(f => f.kind === "video")?.source_id, a = autoMode(sid);
+  const b = (m, l) => `<button type="button" aria-pressed="${numMode === m}" onclick="setNum('${m}')">${l}</button>`;
+  return `<div class="numbering"><div class="row"><span style="font-weight:600;font-size:14px">Episode numbering</span>
+    <div class="seg" role="group" aria-label="Episode numbering" style="margin-left:auto">${b("auto", `Auto${numMode === "auto" ? ` (${a.mode === "posted" ? "as posted" : "continuous"})` : ""}`)}${b("posted", "As posted")}${b("continuous", "Continuous")}</div></div>
+    <small>${numMode === "auto" ? a.why : numMode === "posted" ? "Channel season/episode numbers are used as-is." : "Channel episodes are counted across seasons and matched to Sonarr's order."} Each file shows where it will go (→ S01E01).</small></div>`;
+}
+function drawChosen() {
+  if (!target) { $("#chosen").innerHTML = ""; return; }
+  const auto = autoPicked, n = Object.keys(lib.files).length;
+  const libNote = lib.loading ? `<div class="libnote"><span class="spin"></span>Checking what's already in ${kind === "tv" ? "Sonarr" : "Radarr"}…</div>` : "";
+  $("#chosen").innerHTML = `<div class="chosen"><div class="img" style="background-image:url('${esc(target.poster || "")}')"></div>
+    <div><b>${esc(target.title)}</b> <span style="color:var(--mute)">${target.year || ""}</span>
+    <small>${target.seasons ? "Seasons " + target.seasons.filter(s => s > 0).join(", ") + " · " : ""}${target.inLibrary ? (kind === "tv" ? "Series is in Sonarr" : "Movie is in Radarr") : `Will be added to ${kind === "tv" ? "Sonarr" : "Radarr"} (no auto-search)`}</small>
+    ${auto ? `<small style="color:var(--ink)">Suggested match. Not right? Tap another poster or search above.</small>` : ""}</div></div>
+    ${n ? `<div class="repl" style="cursor:default"><span class="chk" style="display:grid;place-items:center;border:2px solid var(--mute);border-radius:4px;font-weight:700;line-height:1">–</span>
+      <span><b>${kind === "tv" ? `${n} episode${n === 1 ? "" : "s"}` : "This movie"} already in library</b>
+      <small>Marked [–] and skipped. Tick one to replace it. The old file is deleted only after the new one imports, and there's no recycle bin.</small></span></div>` : ""}${libNote}${numberingHtml()}${linkHtml()}`;
+}
+$("#dl").onclick = async e => {
+  if (!target) { $("#step2").scrollIntoView({behavior: "smooth", block: "start"}); $("#lt").focus({preventScroll: true}); return; }
+  const btn = e.currentTarget;
+  let items = files.filter(f => f.sel);
+  const existing = items.filter(inLib);
+  if (existing.length) {
+    const names = existing.map(f => kind === "tv" ? `S${pad(f.season ?? 1)}E${pad(f.episode)}` : esc(f.name));
+    const ok = await ask({title: `Replace ${plural(existing.length, "file")}?`, danger: true, icon: "retry", ok: "Download & replace",
+      body: `<p>Already in the library: <b>${names.slice(0, 12).join(", ")}${names.length > 12 ? ` +${names.length - 12} more` : ""}</b></p>
+        <p>The old file is deleted <b>only after</b> the new one downloads and imports. There's no recycle bin, so it's permanent.</p>
+        ${items.length > existing.length ? `<p>The other ${plural(items.length - existing.length, "file")} ${items.length - existing.length === 1 ? "is" : "are"} new.</p>` : ""}`});
+    if (!ok) return;
+  }
+  items = items.map(f => {
+    const m = mapEp(f);  // send Sonarr's numbering; keep what the channel posted for reference
+    return {...f, replace: !!inLib(f), ...(m ? {season: m.s, episode: m.e, posted_season: f.season, posted_episode: f.episode} : {})};
+  });
+  const bad = items.filter(f => { const m = mapEp(files.find(x => x.msg_id === f.msg_id && x.source_id === f.source_id)); return m && m.ok === false; });
+  if (bad.length && !await ask({title: `${plural(bad.length, "file")} without a Sonarr episode`, icon: "retry", ok: "Download anyway",
+    body: `<p>These don't match any episode in Sonarr with the current numbering, so their import will fail:</p><p><b>${bad.slice(0, 10).map(f => `S${pad(f.season ?? 1)}E${pad(f.episode)}`).join(", ")}</b></p><p>Try another <b>Episode numbering</b> mode, or fix S/E on those rows.</p>`})) return;
+  busy(btn, true);
+  let r;
+  try { r = await api("/download", {method: "POST", body: {kind, target, items}}); }
+  catch (err) { toast(err.message, true); return; }
+  finally { busy(btn, false); }  // restore the button (and its label) before anything re-renders it
+  files.forEach(f => f.sel = false); render();
+  toast(`Queued ${plural(r.ids.length, "download")}. See Jobs.`); buzz();
+  linkSources(items);
+  loadJobs();
+};
+
+// ---------- jobs ----------
+const ACTIVE = ["starting", "downloading", "extracting", "importing"];
+const ITEM_ACTS = {queued: ["pause", "stop"], starting: ["pause", "stop"], downloading: ["pause", "stop"], paused: ["resume", "stop"], stopped: ["resume"], error: ["retry"]};
+const ACT_ICON = {pause: "pause", resume: "play", stop: "stop", retry: "retry"};
+let lastJobs = [];
+const pend = new Set();  // "<jobId|batchId>:<action>" currently in flight
+const isBusy = id => [...pend].some(k => k.startsWith(id + ":"));
+const actBtn = (key, onclick, icon, label, danger, locked) => pend.has(key)
+  ? `<button class="icon-btn" disabled aria-label="${label}…"><span class="spin"></span></button>`
+  : `<button class="icon-btn ${danger ? "danger" : ""}" onclick="${onclick}" aria-label="${label}" title="${label}" ${locked ? "disabled" : ""}>${I(icon)}</button>`;
+async function track(key, fn) {
+  if (pend.has(key)) return;  // ignore repeat clicks while the first is running
+  pend.add(key); renderJobs(lastJobs);  // show the spinner now, not after the next poll
+  try { await fn(); } catch (e) { toast(e.message, true); }
+  finally { pend.delete(key); await loadJobs(); }
+}
+
+function batchState(js) {
+  const c = s => js.filter(j => j.status === s).length;
+  const n = js.length, done = c("done"), err = c("error"), act = js.filter(j => ACTIVE.includes(j.status)).length;
+  const label = act ? `${act} active` : c("queued") ? "Queued" : c("paused") ? "Paused" : c("stopped") ? "Stopped" : err ? "Failed" : "Done";
+  const cls = act || c("queued") ? "downloading" : c("paused") ? "paused" : c("stopped") ? "stopped" : err ? "error" : "done";
+  return {n, done, err, label, cls,
+    can: {pause: js.some(j => ["queued", "starting", "downloading"].includes(j.status)), resume: js.some(j => ["paused", "stopped"].includes(j.status)),
+          "retry-failed": err > 0, stop: js.some(j => ["queued", "starting", "downloading", "paused"].includes(j.status))}};
+}
+
+let jobsSeq = 0;
+async function loadJobs() {
+  const seq = ++jobsSeq;
+  let js;
+  try { js = await api("/jobs", {quiet: true}); } catch { return; }
+  if (seq !== jobsSeq) return;  // a newer refresh already rendered
+  renderJobs(js);
+}
+function renderJobs(js) {
+  lastJobs = js;
+  const active = js.filter(j => j.status === "queued" || ACTIVE.includes(j.status)).length;
+  $("#jobcount").textContent = active || "";
+  if (!$("#jobs").classList.contains("on")) return;
+
+  const groups = new Map();
+  for (const j of js) { if (!groups.has(j.batch)) groups.set(j.batch, []); groups.get(j.batch).push(j); }
+  morph($("#jlist"), [...groups].map(([bid, items]) => {
+    items.sort((a, b) => (a.season ?? 0) - (b.season ?? 0) || (a.episode ?? 0) - (b.episode ?? 0));
+    const t = items[0].target, st = batchState(items);
+    const size = items.reduce((a, j) => a + (j.size || 0), 0), got = items.reduce((a, j) => a + (j.status === "done" ? j.size : j.done || 0), 0);
+    const speed = items.reduce((a, j) => a + (j.speed || 0), 0);
+    // everything still to fetch at the current combined speed (queued items wait for a free worker, so it's an estimate)
+    const left = items.filter(j => ["queued", "starting", "downloading"].includes(j.status)).reduce((a, j) => a + Math.max(0, (j.size || 0) - (j.done || 0)), 0);
+    const open = openBatches.has(bid);
+    const bLocked = isBusy(bid);
+    const bBtn = (a, icon, label, danger) => st.can[a] === false && !pend.has(`${bid}:${a}`) ? "" :
+      actBtn(`${bid}:${a}`, `batchAct('${bid}','${a}')`, icon, label, danger, bLocked);
+    return `<article class="batch ${open ? "open" : ""}" data-key="${bid}">
+      <div class="bhead">
+        <div class="bposter" style="background-image:url('${esc(t.poster || "")}')"></div>
+        <div class="btitle" onclick="toggleBatch('${bid}')" role="button" tabindex="0" aria-expanded="${open}" onkeydown="if(event.key==='Enter')toggleBatch('${bid}')">
+          <b>${esc(t.title)}${t.year ? ` <span style="color:var(--mute);font-weight:400">${t.year}</span>` : ""}${items[0].via === "sonarr" ? ` <span class="tag ok" style="vertical-align:middle">via Sonarr</span>` : ""}</b>
+          <small><span class="st ${st.cls}">${st.label}</span> ${st.done}/${st.n} done · ${fmt(got)} / ${fmt(size)}${speed ? ` · ${mbps(speed)} · <b>${eta(left, speed)}</b>` : ""}${st.err ? ` · <span class="err">${st.err} failed</span>` : ""}</small>
+          <div class="bar ${st.cls}"><i style="width:${size ? Math.min(100, got / size * 100) : 0}%"></i></div>
+        </div>
+        <div class="bactions">
+          ${bBtn("pause", "pause", "Pause batch")}${bBtn("resume", "play", "Resume batch")}${bBtn("retry-failed", "retry", "Retry failed in batch")}
+          ${bBtn("stop", "stop", "Stop batch")}${bBtn("remove", "trash", "Remove batch", true)}
+          <button class="icon-btn" onclick="toggleBatch('${bid}')" aria-label="${open ? "Collapse" : "Expand"}"><svg class="i chev"><use href="#i-chev"/></svg></button>
+        </div>
+      </div>
+      <div class="items"><div class="items-clip"><div class="items-in">${seasonsHtml(bid, items)}</div></div></div>
+    </article>`;
+  }).join("") || `<div class="card empty">No jobs yet. Pick files in Find and press Download.</div>`);
+}
+// multi-season TV batches get a collapsible header per season; single-season batches list episodes directly
+const seasonOpen = new Map(Object.entries(store.get("tgarr.seasons", {})));  // explicit user choice per "<batch>~<season>"
+function seasonsHtml(bid, items) {
+  const by = new Map();
+  for (const j of items) { const s = j.kind === "tv" ? (j.season ?? 1) : null; if (!by.has(s)) by.set(s, []); by.get(s).push(j); }
+  if (by.size < 2) return items.map(itemHtml).join("");
+  return [...by].sort((a, b) => a[0] - b[0]).map(([s, js]) => {
+    const key = `${bid}~${s}`, st = batchState(js);
+    const size = js.reduce((a, j) => a + (j.size || 0), 0), got = js.reduce((a, j) => a + (j.status === "done" ? j.size : j.done || 0), 0);
+    const speed = js.reduce((a, j) => a + (j.speed || 0), 0);
+    const left = js.filter(j => ["queued", "starting", "downloading"].includes(j.status)).reduce((a, j) => a + Math.max(0, (j.size || 0) - (j.done || 0)), 0);
+    const open = seasonOpen.get(key) === true;  // seasons start collapsed every time the batch is opened
+    const locked = isBusy(bid) || isBusy(key);
+    const sBtn = (a, icon, label, danger) => st.can[a] === false && !pend.has(`${key}:${a}`) ? "" :
+      actBtn(`${key}:${a}`, `batchAct('${bid}','${a}',${s})`, icon, label, danger, locked);
+    return `<section class="season ${open ? "open" : ""}" data-key="${key}">
+      <div class="shead">
+        <div class="stitle" onclick="toggleSeason('${key}', ${open})" role="button" tabindex="0" aria-expanded="${open}" onkeydown="if(event.key==='Enter')toggleSeason('${key}', ${open})">
+          <b>Season ${s}</b><small><span class="st ${st.cls}">${st.label}</span> ${st.done}/${st.n} done · ${fmt(got)} / ${fmt(size)}${speed ? ` · ${mbps(speed)} · <b>${eta(left, speed)}</b>` : ""}${st.err ? ` · <span class="err">${st.err} failed</span>` : ""}</small>
+          <div class="bar ${st.cls}"><i style="width:${size ? Math.min(100, got / size * 100) : 0}%"></i></div>
+        </div>
+        <div class="bactions">
+          ${sBtn("pause", "pause", `Pause season ${s}`)}${sBtn("resume", "play", `Resume season ${s}`)}${sBtn("retry-failed", "retry", `Retry failed in season ${s}`)}
+          ${sBtn("stop", "stop", `Stop season ${s}`)}${sBtn("remove", "trash", `Remove season ${s}`, true)}
+          <button class="icon-btn" onclick="toggleSeason('${key}', ${open})" aria-label="${open ? "Collapse" : "Expand"} season ${s}"><svg class="i chev"><use href="#i-chev"/></svg></button>
+        </div>
+      </div>
+      <div class="items"><div class="items-clip"><div class="items-in">${js.map(itemHtml).join("")}</div></div></div>
+    </section>`;
+  }).join("");
+}
+window.toggleSeason = (key, wasOpen) => {
+  seasonOpen.set(key, !wasOpen);
+  store.set("tgarr.seasons", Object.fromEntries(seasonOpen));
+  renderJobs(lastJobs);
+};
+function itemHtml(j) {
+  const pct = j.status === "done" ? 100 : j.size ? Math.min(100, j.done / j.size * 100) : 0;
+  const label = j.kind === "tv" && j.episode != null ? `S${pad(j.season ?? 1)}E${pad(j.episode)}` : j.dest.split("/").pop();
+  return `<div class="item" data-key="${j.id}" data-status="${j.status}">
+    <div><div class="n">${esc(label)}</div>
+      <div class="sub"><span class="st ${j.status}">${j.status}</span><span>${fmt(j.done)} / ${fmt(j.size)}</span>${j.speed ? `<span>${mbps(j.speed)}</span><span><b>${eta(j.size - j.done, j.speed)}</b></span>` : ""}</div></div>
+    <div class="ia">${(lock => [...new Set([...(ITEM_ACTS[j.status] || []), ...[...pend].filter(k => k.startsWith(j.id + ":")).map(k => k.split(":")[1]).filter(a => a !== "remove")])]
+        .map(a => actBtn(`${j.id}:${a}`, `jobAct('${j.id}','${a}')`, ACT_ICON[a], a, false, lock)).join("") +
+        actBtn(`${j.id}:remove`, `jobAct('${j.id}','remove')`, "trash", "Remove", true, lock))(isBusy(j.id) || isBusy(j.batch) || isBusy(`${j.batch}~${j.season ?? 1}`))}</div>
+    <div class="full"><div class="bar ${j.status}"><i style="width:${pct}%"></i></div>
+      <div class="sub" style="margin-top:4px">${esc(j.name)}</div>
+      ${j.error ? `<div class="sub err">${esc(j.error)}</div>` : ""}${j.library ? `<div class="sub">→ ${esc(j.library)}</div>` : ""}</div>
+  </div>`;
+}
+window.toggleBatch = bid => {
+  if (openBatches.has(bid)) openBatches.delete(bid);
+  else {  // opening a batch: show its seasons collapsed
+    openBatches.add(bid);
+    for (const k of [...seasonOpen.keys()]) if (k.startsWith(bid + "~")) seasonOpen.delete(k);
+    store.set("tgarr.seasons", Object.fromEntries(seasonOpen));
+  }
+  store.set("tgarr.open", [...openBatches]);
+  renderJobs(lastJobs);
+};
+const jobLabel = j => j.kind === "tv" && j.episode != null ? `${j.target.title} · S${pad(j.season ?? 1)}E${pad(j.episode)}` : j.target.title;
+window.jobAct = async (id, a) => {
+  const j = lastJobs.find(j => j.id === id);
+  if (a === "remove" && j && !await ask({title: "Remove this job?", danger: true, ok: "Remove",
+    body: `<div class="m-sum"><div class="img" style="background-image:url('${esc(j.target.poster || "")}')"></div><div><b>${esc(jobLabel(j))}</b><br><span class="st ${j.status}">${j.status}</span></div></div>
+      ${j.status === "done" ? `<p>It's already in your library and stays there. This only clears it from the list.</p>`
+        : `<p>${j.done ? `The partial download (${fmt(j.done)}) is deleted.` : "Nothing has been downloaded yet."} Files already in the library aren't touched.</p>`}`})) return;
+  if (a === "stop" && j && j.done && !await ask({title: "Stop this download?", danger: true, icon: "stop", ok: "Stop",
+    body: `<p><b>${esc(jobLabel(j))}</b>: ${fmt(j.done)} of ${fmt(j.size)} downloaded will be deleted. Use <b>Pause</b> to keep it and resume later.</p>`})) return;
+  await track(`${id}:${a}`, () => api(a === "remove" ? `/jobs/${id}` : `/jobs/${id}/${a}`, {method: a === "remove" ? "DELETE" : "POST"}));
+};
+window.batchAct = async (bid, a, season) => {
+  const scoped = season != null, what = scoped ? `season ${season}` : "batch";
+  if (a === "remove" || a === "stop") {
+    const js = lastJobs.filter(j => j.batch === bid && (!scoped || (j.season ?? 1) === season)), t = js[0]?.target || {};
+    const done = js.filter(j => j.status === "done").length, partial = js.filter(j => j.status !== "done" && j.done > 0);
+    const pending = js.filter(j => !["done", "error"].includes(j.status)).length;
+    const sum = `<div class="m-sum"><div class="img" style="background-image:url('${esc(t.poster || "")}')"></div>
+      <div><b>${esc(t.title || "")}${scoped ? ` · Season ${season}` : ""}</b><br>${plural(js.length, "item")} · ${done} done${pending ? ` · ${pending} not finished` : ""}</div></div>`;
+    const partialLine = partial.length ? `<li>${plural(partial.length, "partial download")} (${fmt(partial.reduce((s, j) => s + j.done, 0))}) will be deleted</li>` : "";
+    const ok = a === "remove"
+      ? await ask({title: `Remove this ${what}?`, danger: true, ok: `Remove ${what}`, body: sum + `<ul>${partialLine}
+          ${pending ? `<li>Unfinished downloads are cancelled</li>` : ""}
+          ${done ? `<li>${plural(done, "episode")} already imported <b>stay in your library</b></li>` : ""}</ul>`})
+      : await ask({title: `Stop this ${what}?`, danger: true, icon: "stop", ok: `Stop ${what}`, body: sum + `<ul>${partialLine}
+          <li>Stopped items stay in the list. Press resume to start them again from zero.</li></ul><p>Use <b>Pause</b> instead to keep partial downloads.</p>`});
+    if (!ok) return;
+  }
+  const key = scoped ? `${bid}~${season}` : bid;
+  await track(`${key}:${a}`, () => api(`/jobs-all/${a}?batch=${encodeURIComponent(bid)}${scoped ? `&season=${season}` : ""}`, {method: "POST"}));
+};
+// toolbar buttons: spinner on the button itself, and lock the whole toolbar while one runs
+async function toolbar(btn, fn) {
+  const all = $$("#jobs .toolbar .btn");
+  if (all.some(b => b.disabled)) return;
+  busy(btn, true); all.forEach(b => b.disabled = true);
+  try { await fn(); } catch (e) { toast(e.message, true); }
+  finally { busy(btn, false); all.forEach(b => b.disabled = false); await loadJobs(); }
+}
+$$("[data-all]").forEach(b => b.onclick = () => toolbar(b, () => api(`/jobs-all/${b.dataset.all}`, {method: "POST"})));
+$("#clear").onclick = e => toolbar(e.currentTarget, () => api("/jobs/clear", {method: "POST"}));
+
+// ---------- boot ----------
+$$("select").forEach(fancy);
+status(); loadCatalog(); loadSources().then(render); loadJobs(); loadInteg();
+setInterval(() => $("#sources").classList.contains("on") && loadInteg(), 15000);
+showTab(["find", "wanted", "sources", "jobs"].includes(location.hash.slice(1)) ? location.hash.slice(1) : "find");
+loadWanted(); setInterval(loadWanted, 60000);
+setInterval(loadJobs, 2000);
+setInterval(status, 30000);
+</script>
+</body>
+</html>

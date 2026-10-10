@@ -1,0 +1,34 @@
+# Portainer stack (Stacks -> Add stack -> Web editor: paste this).
+# Secrets go in the stack's Environment variables, not in this file. See README -> "Run it with Portainer".
+services:
+  tgarr:
+    image: ghcr.io/omer182/tgarr:latest
+    container_name: tgarr
+    restart: unless-stopped
+    user: "1000:1000" # must own the config folder and be able to write the download folder
+    ports:
+      - 8765:8765 # web UI on the LAN. Sonarr and Prowlarr reach it as http://tgarr:8765 over the proxy network
+    networks: [proxy]
+    environment:
+      TG_API_ID: ${TG_API_ID}
+      TG_API_HASH: ${TG_API_HASH}
+      SONARR_URL: http://sonarr:8989
+      SONARR_KEY: ${SONARR_KEY}
+      SONARR_ROOT: /data/media/tv
+      SONARR_PROFILE: "6" # quality profile id used when tgarr adds a series itself
+      RADARR_URL: http://radarr:7878
+      RADARR_KEY: ${RADARR_KEY}
+      RADARR_ROOT: /data/media/movies
+      RADARR_PROFILE: "6"
+      PLEX_URL: http://172.18.0.1:32400 # Plex runs on the host network; this is the proxy network's gateway
+      PLEX_TOKEN: ${PLEX_TOKEN:-}
+      PLEX_PATH_MAP: /data/media=/data/data/media # Sonarr's path prefix = Plex's path prefix
+      TZ: Asia/Jerusalem
+    volumes:
+      - /hosted-apps/tgarr/config:/config # Telegram session, sources, jobs, index, API key. Keep it private.
+      - /mnt/storage/data:/data # the same /data mount Sonarr and Radarr use, so paths and hardlinks match
+
+networks:
+  proxy:
+    name: proxy
+    external: true

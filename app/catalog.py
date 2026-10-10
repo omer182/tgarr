@@ -56,7 +56,7 @@ async def entries(force: bool = False) -> list[dict]:
 
 SETTINGS_FILE = config.CONFIG_DIR / "settings.json"
 STATE_FILE = config.CONFIG_DIR / "auto_state.json"
-DEFAULTS = {"auto_join": True, "max_joins_per_day": 5, "fallback_minutes": 30}
+DEFAULTS = {"auto_join": False, "max_joins_per_day": 5, "fallback_minutes": 30}
 _state: dict | None = None
 
 
@@ -145,13 +145,7 @@ async def get_it(tvdb_id: int, search: bool = True) -> dict:
 
 _last_join = 0.0
 _failed: dict[int, float] = {}  # tvdb -> when the last automatic attempt failed (retry after an hour)
-
-
-async def _sonarr_busy(series_id: int) -> bool:
-    """Is Sonarr already downloading (or holding a delayed release for) this series? Then a tracker had it."""
-    from . import arr
-    q = await arr.sonarr.req("GET", "/queue", params={"seriesIds": series_id, "pageSize": 1})
-    return (q.get("totalRecords") or 0) > 0
+_checked: dict[int, float] = {}  # tvdb -> when we last asked Telegram whether the user is in its channel
 
 
 async def _sonarr_busy(series_id: int) -> bool:
@@ -181,6 +175,18 @@ async def auto_process():
         if time.time() - _failed.get(tv, 0) < 3600:
             continue
         try:
+            # The user may have joined the channel in the Telegram app rather than through tgarr: ask Telegram
+            # (one cheap invite check per wanted series, at most every 5 minutes) and pick it up from there.
+            if not w["linked"] and not w["joined"] and w["entry"] and time.time() - _checked.get(tv, 0) > 300:
+                _checked[tv] = time.time()
+                info = await tg.resolve(w["entry"]["url"])
+                if info.get("joined"):
+                    if not w["source_id"]:
+                        store.add_source(w["entry"]["url"], "tv", "", info)
+                    else:
+                        store.update_source({"id": w["source_id"], **info})
+                    w["joined"] = True
+                    _log(f"Noticed you joined the channel for {w['title']}")
             if not w["linked"] and w["joined"]:
                 r = await get_it(tv, search=False)
                 _log(f"Linked {w['title']} to its channel ({r['releases']} episodes)")

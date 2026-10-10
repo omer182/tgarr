@@ -894,7 +894,7 @@ async function loadWanted() {
       : w.joined ? `You're in its channel. It links itself within a minute`
       : auto && w.demand ? `In a channel you haven't joined (<span dir="auto">${esc(ch)}</span>). ${!autoCfg.joins_left_today ? "Today's join limit is reached, so tgarr joins it tomorrow" : due ? `If your trackers still have nothing in about ${due} min, tgarr joins it and downloads from there` : "Your trackers had nothing, so tgarr is joining it now"}`
       : auto ? `In a channel you haven't joined (<span dir="auto">${esc(ch)}</span>). Not requested recently, so tgarr leaves it alone. Press the button to get it`
-      : `Available in a channel you haven't joined: <span dir="auto">${esc(ch)}</span>`;
+      : `In a channel you haven't joined: <span dir="auto">${esc(ch)}</span>. Join with the button, or <a href="${esc(w.entry?.url || "#")}" target="_blank" rel="noopener" style="color:var(--accent);font-weight:600">open it in Telegram</a> and join there. tgarr notices within a few minutes and does the rest`;
     const btn = w.linked ? `<button class="btn" onclick="wantSearch(${w.tvdbId}, this)">${I("search")}Search now</button>`
       : `<button class="btn" onclick="wantGet(${w.tvdbId}, this)" title="Skip the wait">${I("dl")}${w.joined ? "Link & get it now" : "Join & get it now"}</button>`;
     return `<div class="want" data-key="${w.tvdbId}"><div class="img" style="background-image:url('${esc(w.poster || "")}')"></div>

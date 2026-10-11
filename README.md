@@ -137,6 +137,47 @@ The image is built by GitHub Actions and published as `ghcr.io/omer182/tgarr:lat
 
 To update, use "Pull and redeploy" on the stack in Portainer.
 
+### Add it to an existing stack
+
+If Sonarr, Radarr and the rest already live in one stack, add tgarr as one more service instead of a separate
+stack. Copy this block into the stack's `services:` section, next to Sonarr, and replace the five `<...>`
+placeholders with your values (keep the quotes):
+
+```yaml
+  tgarr:
+    image: ghcr.io/omer182/tgarr:latest
+    container_name: tgarr
+    user: "1000:1000"
+    restart: unless-stopped
+    ports:
+      - 8765:8765
+    networks: [proxy]
+    environment:
+      TG_API_ID: "<TG_API_ID>"
+      TG_API_HASH: "<TG_API_HASH>"
+      SONARR_URL: http://sonarr:8989
+      SONARR_KEY: "<SONARR_KEY>"
+      RADARR_URL: http://radarr:7878
+      RADARR_KEY: "<RADARR_KEY>"
+      PLEX_URL: http://172.18.0.1:32400
+      PLEX_TOKEN: "<PLEX_TOKEN>"
+      TZ: Asia/Jerusalem
+    volumes:
+      - /hosted-apps/tgarr/config:/config
+      - /mnt/storage/data:/data
+```
+
+What to adjust for your own setup:
+
+- `networks`: the Docker network your Sonarr and Prowlarr containers are on, so they can reach `http://tgarr:8765`.
+- `SONARR_URL`, `RADARR_URL`: your containers' names and ports on that network.
+- `PLEX_URL`: where Plex is reachable from inside the container. `172.18.0.1` is the gateway of the network above,
+  which works when Plex runs on the host network. Leave `PLEX_URL` and `PLEX_TOKEN` out if you do not use Plex.
+- `user`: the user id that owns the config folder and can write the `/data` folder.
+- The second volume must be the same `/data` mount Sonarr and Radarr use.
+
+Then create the config folder (step 1 above), update the stack, and log in to Telegram (step 4 above).
+
 ## Connect Sonarr and Prowlarr
 
 The exact values are shown in the web page under Sources -> Sonarr integration -> Show connection details.

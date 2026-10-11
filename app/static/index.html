@@ -466,6 +466,7 @@ dialog#modal[open]{animation:pop .18s ease-out}
     <div class="hint">No link? Pick any group or channel you're already in, including private ones. You can also paste a message link (t.me/c/…).</div>
   </div>
   <div class="card" id="slist"></div>
+  <div class="card" id="dirs"></div>
   <div class="card" id="integ"></div>
 </section>
 
@@ -1028,7 +1029,48 @@ function titleCandidates(name) {
 }
 // directory channels give an English title for channels named in another language
 let catalogEntries = [];
-async function loadCatalog() { try { catalogEntries = (await api("/catalog", {quiet: true})).entries || []; } catch {} }
+let directories = [];
+async function loadCatalog(data) {
+  try { const d = data || await api("/catalog", {quiet: true}); catalogEntries = d.entries || []; directories = d.directories || []; } catch {}
+  drawDirs();
+}
+// Directory channels: one invite link per show, captioned with the show's name. They give tgarr English titles
+// for channels named in another language and fill the Wanted tab.
+function drawDirs() {
+  $("#dirs").innerHTML = `<h2>Directory channels</h2>
+    <div class="hint" style="margin-top:0">A directory is a channel that lists one invite link per show, captioned with the show's name
+      (for example <span dir="auto">"Spy X Family - משפחה חשאית"</span>). tgarr uses it to match channels to series and to fill the Wanted tab.
+      You need to be a member of the directory.</div>
+    ${directories.map((d, i) => `<div class="integ-row"><span>${I("list")}</span><span><b dir="auto">${esc(d)}</b></span>
+      <span class="n">${plural(catalogEntries.filter(e => e.directory === d).length, "show")}</span>
+      <button class="icon-btn danger" onclick="delDir(${i})" aria-label="Remove directory ${esc(d)}">${I("trash")}</button></div>`).join("")
+      || `<div class="empty">No directories yet.</div>`}
+    <div class="row" style="margin-top:12px">
+      <input id="dirIn" type="text" inputmode="url" autocapitalize="off" spellcheck="false" placeholder="@channel or https://t.me/channel" style="flex:1 1 220px" aria-label="Directory channel">
+      <button class="btn" id="dirAdd">${I("plus")}Add directory</button>
+    </div>`;
+  $("#dirAdd").onclick = async e => {
+    const btn = e.currentTarget;
+    const name = $("#dirIn").value.trim().replace(/^https?:\/\/t\.me\/(?!\+|joinchat)/i, "").replace(/^@/, "").replace(/\/+$/, "");
+    if (!name) return $("#dirIn").focus();
+    if (directories.includes(name)) return toast("That directory is already added");
+    busy(btn, true);
+    try {
+      const d = await api("/catalog/directories", {method: "PUT", body: {directories: [...directories, name]}});
+      const n = (d.entries || []).filter(x => x.directory === name).length;
+      toast(n ? `Added ${name}: ${plural(n, "show")} listed` : `Added ${name}, but no show links were found in it`, !n);
+      await loadCatalog(d); loadWanted();
+    } catch (err) { toast(err.message, true); busy(btn, false); }
+  };
+  $("#dirIn").onkeydown = e => { if (e.key === "Enter") $("#dirAdd").click(); };
+}
+window.delDir = async i => {
+  const d = directories[i];
+  if (!await ask({title: "Remove this directory?", danger: true, ok: "Remove",
+    body: `<p><b dir="auto">${esc(d)}</b> will no longer be used to match channels or fill the Wanted tab.</p><p>Your sources, links and downloads stay as they are.</p>`})) return;
+  try { await loadCatalog(await api("/catalog/directories", {method: "PUT", body: {directories: directories.filter((_, j) => j !== i)}})); loadWanted(); toast("Directory removed"); }
+  catch (e) { toast(e.message, true); }
+};
 const catalogFor = s => catalogEntries.find(e => e.url === s.link)
   || catalogEntries.find(e => (e.he || []).some(h => h.length >= 4 && (s.title || "").includes(h)));
 let pickTrust = "guess";  // how the current series was chosen: "exact" title match, "user" tap, or a "guess"

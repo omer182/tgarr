@@ -1,6 +1,16 @@
 # tgarr
 
-Use Telegram channels as a source for Sonarr and Radarr.
+[![Test, build & push image](https://github.com/omer182/tgarr/actions/workflows/docker.yml/badge.svg)](https://github.com/omer182/tgarr/actions/workflows/docker.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+**tgarr is a self-hosted bridge between Telegram and the \*arr stack.** It turns the Telegram channels you are a
+member of into a source for Sonarr and Radarr: a Newznab indexer, a SABnzbd-compatible download client, and a web
+page for picking files by hand. It runs as one Docker container next to Sonarr, Radarr, Prowlarr and Plex.
+
+It is an independent, unofficial project. It is not affiliated with Telegram, Sonarr, Radarr, Prowlarr, Plex or any
+channel.
+
+## What it is for
 
 Some shows, especially ones with fan-made subtitles, never reach torrent trackers but are posted in Telegram
 channels. tgarr logs in to Telegram as your own account, reads the channels you are in, and makes their files
@@ -17,6 +27,7 @@ Use it only for material you have the right to download.
 ## Contents
 
 - [How it works](#how-it-works)
+- [Example: AnimeIL-TV](#example-animeil-tv)
 - [What you need](#what-you-need)
 - [Run it with Portainer](#run-it-with-portainer)
 - [Connect Sonarr and Prowlarr](#connect-sonarr-and-prowlarr)
@@ -26,6 +37,7 @@ Use it only for material you have the right to download.
 - [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
 - [Development](#development)
+- [License](#license)
 
 ## How it works
 
@@ -55,6 +67,45 @@ You -> Overseerr -> Sonarr -> Prowlarr -> tgarr (indexer)   answers from an inde
 - **Directories.** A "directory" channel that lists one invite link per show gives tgarr English titles for
   channels named in another language. It also powers the Wanted tab: series Sonarr is missing that one of those
   channels carries.
+
+## Example: AnimeIL-TV
+
+[AnimeIL-TV](https://t.me/AnimeILTV) is a Hebrew fansub group. It runs one Telegram channel per show, plus a
+directory channel, `@AnimeILTV`, that posts an invite link for each of them with the show's name in English and
+Hebrew:
+
+```
+Spy X Family - משפחה חשאית
+https://t.me/+XXXXXXXXXXXXXXXX
+```
+
+The show channels themselves are named and captioned in Hebrew, for example
+`[AnimeIL-TV] - משפחה חשאית`, with files like `עונה 1 פרק 12` (season 1, episode 12).
+
+Set up once:
+
+1. Join `@AnimeILTV` with your Telegram account.
+2. In tgarr go to Sources -> Directory channels and add `AnimeILTV`. tgarr reads the list of shows and their
+   English titles.
+
+Then, for a show such as Spy x Family:
+
+1. Request it in Overseerr (or add it in Sonarr). Sonarr searches your trackers first.
+2. It appears in tgarr's Wanted tab, because Sonarr is missing it and the directory lists a channel for it.
+3. Join that channel: press "Join & get it now", or open the link and join in Telegram. With hands-off mode on,
+   tgarr does this itself when your trackers still have nothing after the fallback delay.
+4. tgarr scans the channel, reads `עונה 1 פרק 12` as S01E12 from the captions, links the channel to
+   "SPY x FAMILY" through the directory's English title, and offers Sonarr releases named like
+   `SPY.x.FAMILY.S01E12.1080p.WEB-DL.HebSub-TG`.
+5. Sonarr grabs them, tgarr downloads them, Sonarr imports them, and they show up in Plex.
+
+Channels do not always count seasons the way TVDB does. AnimeIL-TV's Demon Slayer channel posts an 18-episode
+"season 2" that TVDB splits into season 2 (7 episodes) and season 3 (11 episodes). tgarr notices that the channel
+season is longer than Sonarr's and counts continuously, so the channel's "season 2, episode 8" is offered to Sonarr
+as S03E01.
+
+Any channel works as a source, with or without a directory. A directory only makes matching automatic for channels
+that are not named in English.
 
 ## What you need
 
@@ -108,8 +159,9 @@ Movies through Radarr work in the manual flow. The indexer and download client c
   Guessed numbers and duplicates are highlighted so you can check them.
 - **Wanted.** Series Sonarr is missing episodes for that one of your directory channels carries, with what will
   happen next for each.
-- **Sources.** The channels tgarr reads, the series each is linked to, the Sonarr integration status and the
-  switch for joining channels automatically.
+- **Sources.** The channels tgarr reads and the series each is linked to. Add a channel by pasting its link or by
+  picking it from your Telegram chats. This tab also holds your directory channels, the Sonarr integration status
+  and the switch for joining channels automatically.
 - **Jobs.** Downloads grouped per request, with pause, resume, stop and remove. Downloads that Sonarr started are
   tagged "via Sonarr".
 
@@ -204,3 +256,8 @@ the season and episode parsing.
 `deploy.sh` is a shortcut for one particular server: it copies the source over SSH, builds the image there,
 restarts the container and re-tests the indexer in Prowlarr and Sonarr. It is not needed when you run the published
 image.
+
+## License
+
+[MIT](LICENSE). You are responsible for how you use it: download only what you have the right to, and follow
+Telegram's terms for your account.

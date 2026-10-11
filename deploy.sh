@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
-# Build & (re)start tgarr on the homeserver. Run from Git Bash: ./deploy.sh
+# Development shortcut: build the image on the homeserver from this working copy and run it in place of the
+# published one (same config folder and settings as docker-compose.prod.yml). Run from Git Bash: ./deploy.sh
+# The secrets stay in ~/tgarr/config/.env on the server. If the container is managed by a Portainer stack,
+# redeploy that stack afterwards to return to the published image.
 set -euo pipefail
 cd "$(dirname "$0")"
 tar czf - Dockerfile requirements.txt app | ssh homeserver 'rm -rf ~/tgarr/src && mkdir -p ~/tgarr/src ~/tgarr/config && tar xzf - -C ~/tgarr/src'
@@ -18,7 +21,7 @@ grep -q '^TG_API_ID=' $ENV || printf 'TG_API_ID=\nTG_API_HASH=\n' >> $ENV
 docker build -q -t tgarr:latest src
 docker rm -f tgarr >/dev/null 2>&1 || true
 docker run -d --name tgarr --restart unless-stopped --network proxy -p 8765:8765 \
-  --env-file $ENV -v $HOME/tgarr/config:/config -v /mnt/storage/data:/data tgarr:latest
+  --env-file $ENV -v /hosted-apps/tgarr/config:/config -v /mnt/storage/data:/data tgarr:latest
 
 # A restart makes Prowlarr and Sonarr see failed requests and mark the indexer "unavailable due to failures";
 # searches then silently skip it. A passing test clears that, so re-test in both once tgarr answers again.

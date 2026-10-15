@@ -652,7 +652,18 @@ let lib = {files: {}};
 // Fan channels often count seasons differently from TVDB (Demon Slayer: channel S2 = TVDB S2 + S3). Episodes keep
 // the same overall order, so "continuous" mode counts channel episodes across seasons and maps them onto TVDB's
 // absolute order. "auto" keeps the posted numbers when every channel season has TVDB's episode count.
-let tvdbEps = null, epIdx = null, numMode = "auto", seasonSizes = {};
+let tvdbEps = null, epIdx = null, numMode = "auto", seasonSizes = {}, seasonMins = {};
+// same rule as indexer.season_offsets: a channel season restarting at 1 continues after the previous one;
+// a season whose numbers carry on from the previous one (1-18, then 19-23) is already absolute
+function seasonOffsets(sid) {
+  const sz = seasonSizes[sid] || {}, mn = seasonMins[sid] || {}, out = {};
+  let prev = null;
+  for (const s of Object.keys(sz).map(Number).sort((a, b) => a - b)) {
+    out[s] = prev === null ? 0 : (mn[s] ?? 1) > sz[prev] ? out[prev] : out[prev] + sz[prev];
+    prev = s;
+  }
+  return out;
+}
 function indexEps(eps) {
   epIdx = {bySE: new Map(), byAbs: new Map(), count: {}};
   for (const e of eps) {
@@ -676,8 +687,7 @@ function mapEp(f) {
   if (!epIdx) return {s: ps, e: pe, ok: null};
   let ep;
   if (modeFor(f.source_id) === "continuous") {
-    const sz = seasonSizes[f.source_id] || {};
-    const off = Object.entries(sz).reduce((a, [k, v]) => +k < ps ? a + v : a, 0);
+    const off = seasonOffsets(f.source_id)[ps] ?? 0;
     ep = epIdx.byAbs.get(off + pe);
   } else ep = epIdx.bySE.get(`${ps}-${pe}`);
   return ep ? {s: ep.s, e: ep.e, title: ep.title, ok: true, moved: ep.s !== ps || ep.e !== pe} : {s: ps, e: pe, ok: false};
@@ -1149,6 +1159,7 @@ $("#fgo").onclick = async e => {
     const r = await api(`/files?source=${encodeURIComponent(src)}&q=${encodeURIComponent(q)}`);
     files = r.files.map(f => ({...f, sel: false}));
     Object.assign(seasonSizes, r.season_sizes || {});
+    Object.assign(seasonMins, r.season_mins || {});
     files.sort((a, b) => a.source_id === b.source_id ? a.msg_id - b.msg_id : a.source_id < b.source_id ? -1 : 1);
     $("#fmsg").innerHTML = `Found ${files.length} file${files.length === 1 ? "" : "s"}.` + r.errors.map(x => `<div class="err">${esc(x)}</div>`).join("");
     if (!target) $("#lt").value.trim() ? lookup(true) : sources.some(s => s.id === src) && lookupFromSource();

@@ -88,3 +88,18 @@ def test_nzb_round_trip():
          "season": 1, "episode": 5, "size": 123, "height": 1080, "ext": ".mp4", "name": "פרק 5.mp4", "posted": 0, "guid": "tgarr-abc-16"}
     ref = indexer.parse_nzb(indexer.nzb_xml(r).encode())
     assert ref["source_id"] == "abc" and ref["msg_id"] == 16 and ref["name"] == "פרק 5.mp4"
+
+
+def test_continuous_numbering_when_channel_counts_straight_through():
+    # Kaiju No. 8: the channel's "season 1" runs 1-18 and its "season 2" carries on at 19; Sonarr has 12 + 11
+    src = {"season_sizes": {"1": 18, "2": 23}, "season_mins": {"1": 1, "2": 19}}
+    files = [vid(1, 12, 1), vid(1, 13, 2), vid(1, 18, 3), vid(2, 19, 4), vid(2, 23, 5)]
+    m = indexer.map_files(src, files, eps(12, 11))
+    assert [(x["s"], x["e"]) for x in m] == [(1, 12), (2, 1), (2, 6), (2, 7), (2, 11)]
+
+
+def test_season_offsets():
+    assert indexer.season_offsets({"1": 26, "2": 18, "3": 11}, {"1": 1, "2": 1, "3": 1}) == {1: 0, 2: 26, 3: 44}
+    assert indexer.season_offsets({"1": 18, "2": 23}, {"1": 1, "2": 19}) == {1: 0, 2: 0}
+    # a season whose first episodes are just missing (starts at 3) still restarts its numbering
+    assert indexer.season_offsets({"1": 12, "2": 12}, {"1": 1, "2": 3}) == {1: 0, 2: 12}

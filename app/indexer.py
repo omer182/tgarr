@@ -72,6 +72,24 @@ def numbering_mode(src: dict, sizes: dict, count: dict) -> str:
     return "continuous" if any(v > count.get(int(k), 0) for k, v in sizes.items()) else "posted"
 
 
+def season_offsets(sizes: dict, mins: dict) -> dict[int, int]:
+    """Continuous numbering: what to add to a channel season's episode numbers to get absolute numbers.
+    A season that restarts at 1 continues after the previous season's last episode. A season whose numbers
+    carry on from the previous one (Kaiju No. 8: "season 1" is 1-18, "season 2" starts at 19) is already
+    absolute and keeps the previous season's offset."""
+    out: dict[int, int] = {}
+    prev = None
+    for s in sorted(int(k) for k in sizes):
+        if prev is None:
+            out[s] = 0
+        elif mins.get(str(s), 1) > sizes[str(prev)]:
+            out[s] = out[prev]
+        else:
+            out[s] = out[prev] + sizes[str(prev)]
+        prev = s
+    return out
+
+
 def map_files(src: dict, files: list[dict], eps: list[dict]) -> list[dict]:
     """One best video per Sonarr episode: [{file, s, e, abs, ep_title}]. Extras, subtitles, archives and
     files without an episode number are left out."""
@@ -81,6 +99,7 @@ def map_files(src: dict, files: list[dict], eps: list[dict]) -> list[dict]:
     for e in eps:
         count[e["s"]] = count.get(e["s"], 0) + 1
     sizes = src.get("season_sizes") or {}
+    offsets = season_offsets(sizes, src.get("season_mins") or {})
     mode = numbering_mode(src, sizes, count)
     best: dict[tuple, dict] = {}
     for f in files:
@@ -88,8 +107,7 @@ def map_files(src: dict, files: list[dict], eps: list[dict]) -> list[dict]:
             continue
         ps = f["season"] if f["season"] is not None else 1
         if mode == "continuous":
-            off = sum(v for k, v in sizes.items() if int(k) < ps)
-            ep = by_abs.get(off + f["episode"])
+            ep = by_abs.get(offsets.get(ps, 0) + f["episode"])
         else:
             ep = by_se.get((ps, f["episode"]))
         if not ep:

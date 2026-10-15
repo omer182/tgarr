@@ -37,7 +37,7 @@ def update_source(src: dict):
     items = _load()
     for i, s in enumerate(items):
         if s["id"] == src["id"]:
-            items[i] = {**s, **{k: src[k] for k in ("chat_id", "title", "joined", "season_sizes") if k in src}}
+            items[i] = {**s, **{k: src[k] for k in ("chat_id", "title", "joined", "season_sizes", "season_mins") if k in src}}
     _save(items)
 
 

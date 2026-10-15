@@ -172,7 +172,8 @@ async def files(source: str = "", q: str = "", limit: int = 0):
 
     results = await asyncio.gather(*(one(s) for s in srcs))
     return {"files": [f for r, _ in results for f in r], "errors": [e for _, e in results if e],
-            "season_sizes": {s["id"]: (store.get_source(s["id"]) or {}).get("season_sizes") or {} for s in srcs}}
+            "season_sizes": {s["id"]: (store.get_source(s["id"]) or {}).get("season_sizes") or {} for s in srcs},
+            "season_mins": {s["id"]: (store.get_source(s["id"]) or {}).get("season_mins") or {} for s in srcs}}
 
 
 @app.get("/api/episodes")

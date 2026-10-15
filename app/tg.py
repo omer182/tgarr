@@ -179,13 +179,16 @@ async def list_files(source: dict, search: str | None = None, limit: int | None 
         elif not m.document and m.message and (s := explicit(m.message)[0]) is not None:
             headers.append((m.id, s))
     apply_context(out, headers)
-    if not search:  # full scan: remember how many episodes each channel season has (for continuous numbering)
+    if not search:  # full scan: each channel season's highest and lowest episode number (for continuous numbering)
         sizes: dict[str, int] = {}
+        mins: dict[str, int] = {}
         for f in out:
             if f["kind"] == "video" and f["episode"] is not None and not f.get("extra"):
                 k = str(f["season"] if f["season"] is not None else 1)
                 sizes[k] = max(sizes.get(k, 0), f["episode"])
+                mins[k] = min(mins.get(k, f["episode"]), f["episode"])
         source["season_sizes"] = sizes
+        source["season_mins"] = mins
     return out
 
 
@@ -240,7 +243,7 @@ async def avatar(chat_id: int) -> Path | None:
 
 EXTRA_WORDS = re.compile(
     r"(?i)trailer|teaser|promo|preview|\bPV\d*\b|\bNCOP\b|\bNCED\b|\bOP\d*\b|\bED\d*\b|opening|ending|sample|making.of|"
-    r"recap|clip|טריילר|טיזר|פרומו|קדימון|פתיח|סיום|קליפ|הצצה|מאחורי הקלעים")
+    r"recap|clip|\bspecial\b|\bOVA\b|\bOAD\b|טריילר|טיזר|פרומו|קדימון|פתיח|סיום|קליפ|הצצה|מאחורי הקלעים|ספיישל")
 
 
 def flag_extras(files: list[dict]):
